@@ -9,7 +9,7 @@ The project has been compiled and run only on Windows.
 The following third-party libraries must be downloaded.
 - [Eigen-3.3.7](https://gitlab.com/libeigen/eigen/-/releases#3.3.7)
 - [CGAL-4.14.3](https://www.cgal.org/)
-- [Gemmi-0.3.3](https://github.com/project-gemmi/gemmi/releases)
+- [Gemmi](https://github.com/project-gemmi/gemmi/releases) - v0.3.3
 
 1. Clone the current repository
 2. Download the specific versions above
