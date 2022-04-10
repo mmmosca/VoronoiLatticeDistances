@@ -96,14 +96,11 @@ Optional commands:
 There are following the Voronoi domains of 5 real crystal lattices from the T2 dataset used in our experiments: T2-epsilon, T2-delta, T2-beta, T2-gamma and T2-alpha.
 
 <p float="left">
-  <img src="images/epsilon.JPG" width="100" />
-  <img src="images/delta.JPG" width="100" />
-  <img src="images/beta.JPG" width="100" />
-</p>
-
-<p float="left">
-  <img src="images/gamma.JPG" width="100" />
-  <img src="images/alpha.JPG" width="100" />
+  <img src="images/epsilon.JPG" width="200" />
+  <img src="images/delta.JPG" width="200" />
+  <img src="images/beta.JPG" width="200" />
+  <img src="images/gamma.JPG" width="200" />
+  <img src="images/alpha.jpg" width="200" />
 </p>
 
 
