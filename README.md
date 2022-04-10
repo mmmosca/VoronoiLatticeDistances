@@ -93,7 +93,7 @@ Optional commands:
 - -threads		[integer t (default t=1)]	Rotation samples are divided among t threads
 
 ## Example of Voronoi Domains
-There are following the Voronoi domains of 5 real crystal lattices from the T2 dataset used in our experiments: T2-epsilon, T2-delta, T2-beta, T2-gamma and T2-alpha.
+There are following the Voronoi domains of 5 real crystal lattices from the T2 dataset used in our experiments: T2-epsilon, T2-delta, T2-beta, T2-gamma and T2-alpha. Plus, the voronoi domains of the standard cubic, body-centred cubic and face-centred cubic lattices.
 
 <p float="left">
   <img src="images/epsilon.JPG" width="200" />
@@ -101,6 +101,9 @@ There are following the Voronoi domains of 5 real crystal lattices from the T2 d
   <img src="images/beta.JPG" width="200" />
   <img src="images/gamma.JPG" width="200" />
   <img src="images/alpha.jpg" width="200" />
+  <img src="images/cubic.PNG" width="200" />
+  <img src="images/bcc.PNG" width="200" />
+  <img src="images/fcc.PNG" width="200" />
 </p>
 
 
