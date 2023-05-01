@@ -89,7 +89,7 @@ let main args =
 
     let src_deps = [|
         (@"https://www.zlib.net/zlib1213.zip", @"zlib-1.2.13");
-        //(@"https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip", @"VTK-8.2.0");
+        (@"https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip", @"VTK-8.2.0");
     |]
     let http = new HttpClient()
     for dep, folder_name in src_deps do
