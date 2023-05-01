@@ -338,8 +338,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-/External/CGAL-4.14.3
-/External/eigen-3.3.7
-/External/Gemmi
+/External
 /out/build/x86-Release
 /out/install/x86-Release
+/build
+/install

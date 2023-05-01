@@ -27,7 +27,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 find_package(Gemmi REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED)
-find_package(VTK REQUIRED)
+find_package(VTK 8.2.0 PATHS "${CMAKE_CURRENT_SOURCE_DIR}/External/VTK-8.2.0/install" REQUIRED)
 find_package(CGAL REQUIRED COMPONENTS Core MODULE)
 
 set (WORKDIR "${CMAKE_BINARY_DIR}/Workdir"
