@@ -18,7 +18,7 @@
 *]]
 IF(NOT DEFINED ENV{GEMMI_ROOT})
 	message(STATUS "Using local package for Gemmi library...")
-	set(PACKAGE_DIR_GEMMI "${CMAKE_CURRENT_SOURCE_DIR}/External/Gemmi")	
+	set(PACKAGE_DIR_GEMMI "${CMAKE_CURRENT_SOURCE_DIR}/External/gemmi-0.3.3")	
 ELSE()
 	message(STATUS "Using system environmental variable package for Gemmi library...")
 	set(PACKAGE_DIR_GEMMI "$ENV{GEMMI_ROOT}")

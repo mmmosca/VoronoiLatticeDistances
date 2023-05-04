@@ -1,6 +1,5 @@
 # Voronoi-based Lattice Distances
-The repository contains the code of Voronoi-based Lattice Distances which encodes crystal lattices to Voronoi Domains and runs Voronoi-based metrics to compare them. 
-The code is written in C++ and CMake. More details on the used metrics can be found in our paper published in the Crystal Research & Technology Journal: [Voronoi-Based Similarity Distances between Arbitrary Crystal Lattices](https://onlinelibrary.wiley.com/doi/10.1002/crat.201900197).
+Voronoi-based Lattice Distances encodes crystal lattices to Voronoi Domains and runs Voronoi-based metrics to compare them. More details on the used metrics can be found in our paper published in the Crystal Research & Technology Journal: [Voronoi-Based Similarity Distances between Arbitrary Crystal Lattices](https://onlinelibrary.wiley.com/doi/10.1002/crat.201900197).
 
 The project has been compiled and run only on `Windows x64`.
 
@@ -16,7 +15,9 @@ The project has been compiled and run only on `Windows x64`.
     - `CMake C++ Tools for Windows`
     - `Git for Windows`
 
-2. The software and shared libraries below must be installed by the user through Windows installers:
+2. Download the repository
+
+3. The software below must be installed through Windows installers:
     - [CGAL-4.14.3-Setup.exe](https://github.com/CGAL/cgal/releases/tag/releases%2FCGAL-4.14.3) 
     
       Note: Install it in `VoronoiLatticeDistances\External\CGAL-4.14.3` folder and choose `64bit` binaries.
@@ -27,20 +28,36 @@ The project has been compiled and run only on `Windows x64`.
 
 3. Add the following environmental variables as User:
     - `VS_DIR`: Path to Visual Studio with all folders (e.g. `Microsoft Visual Studio\2022\Community`)
-    
-4. Download the repository
 
-5. Run the following in a `Command Prompt` (no PowerShell) to build and install it:
+5. Run the following in a `Command Prompt` (no PowerShell) to install it:
     ```
       "%VS_DIR%\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
       cd VoronoiLatticeDistances/windows-setup
       dotnet build
       dotnet run
     ```
+6. Restart the command prompt and run the executables: `voronoilatticedistances.exe` or `voronoilatticedistances_off.exe`.
 
-## Usage: Run the metric computations
-To compute correctly the metrics, it is required that all input CIF files contain the primitive unit cell.
-Running the executable `voronoilatticedistances.exe` without parameters, it outputs the usage as follows: 
+## Usage
+To compute correctly the metrics, it is required that all input `CIF` files contain the primitive unit cell.
+Run the executable without parameters for the usage. There are following some examples.
+### Produce Voronoi-based metrics from CIF files on 5 threads
+```
+  .\voronoilatticedistances.exe -inputdir "path\to\cif_folder" -outputdir "path\to\output_dir" -ds -dh -threads 5
+```
+### Generate OFF files of Voronoi Domains and their volumes
+```
+  .\voronoilatticedistances.exe -inputdir "path\to\cif_folder" -outputdir "path\to\output_dir" -off -vol
+```
+### Generate Voronoi Domains for 3D visualization
+File `.vtp` can be visualized with [Paraview software](https://www.paraview.org/).
+```
+  .\voronoilatticedistances.exe -inputdir "path\to\cif_folder" -outputdir "path\to\output_dir" -vtp
+```
+### Produce Voronoi-based metrics from OFF files
+```
+  .\voronoilatticedistances_off.exe -inputdir "path\to\off_folder" -outputdir "path\to\output_dir" -ds -dh 
+```
 
 Required options: 
 
@@ -59,23 +76,6 @@ Output options (at least 1 required):
 Optional commands: 
 
 - `-intervals`	[integer n (default n=2)]	It affects the number of rotation samples to be considered for metric computations (total number of rotations: 4*pi^2*n^3) 
-- `-threads`		[integer t (default t=1)]	Rotation samples are divided among t threads
-
-If users want to divide the voronoi cell computation from the metric computation, they can run `voronoilatticedistances_off.exe` to compute only the metrics from OFF files.
-
-Required options:
-
-- `-inputdir`		[Input Folder with Voronoi Cell OFF files]
-- `-outputdir`	[Output Folder to write metric results]
-
-Output options (at least 1 required):
-
-- `-ds`	Outputs .csv file with Scale Invariant Distance matrix (n x n) between all n crystal structures
-- `-dh`	Outputs .csv file with Extended Hausdorff Distance matrix (n x n) between all n crystal structures
-
-Optional commands:
-
-- `-intervals`	[integer n (default n=2)]	It affects the number of rotation samples to be considered for metric computations (number of rotations: 4*pi^2*n^3)
 - `-threads`		[integer t (default t=1)]	Rotation samples are divided among t threads
 
 ## Example of Voronoi Domains

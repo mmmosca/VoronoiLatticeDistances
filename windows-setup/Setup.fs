@@ -52,7 +52,9 @@ let configure (src_dir:string) (variables: string array) =
         "-L";
         "-G"; "Visual Studio 17 2022";
         sprintf @"-DCMAKE_INSTALL_PREFIX=%s" (Path.Combine(src_dir, "install"));
-        @"-DCMAKE_C_COMPILER=cl"; 
+        @"-DCMAKE_C_COMPILER=cl";
+        @"-DBUILD_EXAMPLES=OFF";
+        @"-DBUILD_TESTING=OFF";
     |]
     |> Array.append variables
     |> start_process "cmake"
@@ -77,7 +79,6 @@ let main args =
     let ext_dir = Path.GetFullPath(@"..\External")
     assert Directory.Exists(ext_dir)
     let boost_dir = Path.Combine(ext_dir, @"boost_1_69_0")
-    // Set by Windows installer
     let cgal_dir = Path.Combine(ext_dir, @"CGAL-4.14.3")
 
     assert Directory.Exists(ext_dir)
@@ -110,8 +111,6 @@ let main args =
         unzip ext_dir path_to_file
         File.Delete(path_to_file)
 
-    Directory.Move(Path.Combine(ext_dir,"gemmi-0.3.3"), Path.Combine(ext_dir,"Gemmi"))
-
     let function_object_h = Path.Combine(cgal_dir, "include/CGAL/Cartesian/function_objects.h")
     assert File.Exists(function_object_h)
     let function_object_lines = 
@@ -122,7 +121,7 @@ let main args =
     File.Delete(function_object_h)
     File.WriteAllLines(function_object_h, function_object_lines)
 
-    let small_hpp = Path.Combine(ext_dir, "Gemmi/include/gemmi/small.hpp")
+    let small_hpp = Path.Combine(ext_dir, "gemmi-0.3.3/include/gemmi/small.hpp")
     assert File.Exists(small_hpp)
     let new_lines = [| 
         @"  if (len > 1) {";
@@ -146,7 +145,7 @@ let main args =
         Path.Combine(cgal_dir, @"auxiliary\gmp\lib");
         Path.Combine(vtk_dir, @"bin");
         Path.Combine(boost_dir, @"lib64-msvc-14.1");
-        Path.Combine(libxml2_dir, @"bin"); 
+        Path.Combine(libxml2_dir, @"bin");
         Path.Combine(zlib_dir, @"bin"); |] do
         assert Directory.Exists(path_value)
         let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
