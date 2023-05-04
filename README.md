@@ -4,7 +4,6 @@ Voronoi-based Lattice Distances encodes crystal lattices to Voronoi Domains and 
 The project has been compiled and run only on `Windows x64`.
 
 ## Installation
-### Download and install dependencies
 1. Install Visual Studio (e.g. Community) choosing the following `single components`:
     - `.NET SDK`
     - `.NET 7.0 Runtime`
