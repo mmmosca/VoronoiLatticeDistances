@@ -1,5 +1,7 @@
 # Project changes
 
+## [0.3.0]
+    - Automate Boost installation with version 1.81.0
 ## [0.2.0]
     - Automate most of the installation
     - Improve documentation

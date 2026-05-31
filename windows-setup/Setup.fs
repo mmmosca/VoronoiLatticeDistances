@@ -40,32 +40,32 @@ let start_process (proc: string) (args: string array) =
     startInfo.CreateNoWindow <- true
     let proc = new Process(StartInfo = startInfo)
     proc.Start() |> ignore
-    (proc.StandardOutput.ReadToEnd()) |> ignore
-    printfn "%s" (proc.StandardError.ReadToEnd())
+    let stdout = proc.StandardOutput.ReadToEnd()
+    let stderr = proc.StandardError.ReadToEnd()
     proc.WaitForExit()
+    if proc.ExitCode <> 0 then
+        failwithf "Process failed (%d): %s" proc.ExitCode stderr
+    printfn "%s" stdout
 
 let configure (src_dir:string) (variables: string array) = 
     let build_dir = Path.Combine(src_dir, "build")
-    [| 
+    variables
+    |> Array.append [|
         "-B"; build_dir; 
         "-S"; src_dir;
         "-L";
-        "-G"; "Visual Studio 17 2022";
-        sprintf @"-DCMAKE_INSTALL_PREFIX=%s" (Path.Combine(src_dir, "install"));
+        sprintf @"-DCMAKE_INSTALL_PREFIX=%s" (Path.Combine(src_dir, "install-dir"));
         @"-DCMAKE_C_COMPILER=cl";
-        @"-DBUILD_EXAMPLES=OFF";
-        @"-DBUILD_TESTING=OFF";
     |]
-    |> Array.append variables
     |> start_process "cmake"
      
     build_dir
 
-let install (build_dir: string) =
+let install (build_dir: string) (build_type: string) =
     [|
         "--build"; build_dir;
         "--target"; "install";
-        "--config"; "Release"
+        "--config"; build_type
     |]
     |> start_process "cmake"
 
@@ -76,9 +76,9 @@ let unzip (output_folder: string) (file: string) =
 
 [<EntryPoint>]
 let main args =
+    let build_type = args[0]
     let ext_dir = Path.GetFullPath(@"..\External")
     assert Directory.Exists(ext_dir)
-    let boost_dir = Path.Combine(ext_dir, @"boost_1_69_0")
     let cgal_dir = Path.Combine(ext_dir, @"CGAL-4.14.3")
 
     assert Directory.Exists(ext_dir)
@@ -89,20 +89,37 @@ let main args =
     |]
 
     let src_deps = [|
-        (@"https://www.zlib.net/zlib1213.zip", @"zlib-1.2.13");
-        (@"https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip", @"VTK-8.2.0");
+        (@"https://github.com/boostorg/boost/releases/download/boost-1.81.0/boost-1.81.0.zip", @"boost-1.81.0", [|@"-DBUILD_SHARED_LIBS=ON";@"-DBUILD_TESTING=OFF"|]);
+        (@"https://www.zlib.net/zlib132.zip", @"zlib-1.3.2", [||]);
+        (@"https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip", @"VTK-8.2.0", [|@"-DBUILD_EXAMPLES=OFF";@"-DBUILD_TESTING=OFF"|]);
     |]
     let http = new HttpClient()
-    for dep, folder_name in src_deps do
+    for dep, folder_name, variables in src_deps do
         printfn "%s - %s" folder_name "Downloading..."
         let path_to_file = download ext_dir http dep
         printfn "%s - %s" folder_name "Unzipping..."
         unzip ext_dir path_to_file
         File.Delete(path_to_file)
         printfn "%s - %s" folder_name "Configuring..."
-        let build_dir = configure (Path.Combine(ext_dir, folder_name)) [||]
+        let build_dir = configure (Path.Combine(ext_dir, folder_name)) variables
         printfn "%s - %s" folder_name "Installing..."
-        install build_dir
+        install build_dir build_type
+        let path_value = Path.Combine(ext_dir, folder_name, @"install-dir\bin");
+        assert Directory.Exists(path_value)
+        let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
+        if not (path.Contains(path_value)) then
+            path <- path + sprintf ";%s" path_value;
+            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
+        match folder_name with
+        | "boost-1.81.0" ->
+            // Rename Boost library files for a naming issue in Boost 
+            let bintorename = Path.Combine(ext_dir, folder_name, @"install-dir\bin") |> Directory.GetFiles
+            let libtorename = Path.Combine(ext_dir, folder_name, @"install-dir\lib") |> Directory.GetFiles
+            Array.append libtorename bintorename
+            |> Array.iter (
+                fun f -> File.Copy(f, f.Replace(@"vc144",@"vc143"))
+            )
+        | _ -> ()
 
     for dep, folder_name in src_nobuild_deps do
         printfn "%s - %s" folder_name "Downloading..."
@@ -110,16 +127,15 @@ let main args =
         printfn "%s - %s" folder_name "Unzipping..."
         unzip ext_dir path_to_file
         File.Delete(path_to_file)
-
-    let function_object_h = Path.Combine(cgal_dir, "include/CGAL/Cartesian/function_objects.h")
-    assert File.Exists(function_object_h)
-    let function_object_lines = 
-        System.IO.File.ReadAllLines(function_object_h)
-        |> Array.indexed 
-        |> Array.filter (fun (i,x) -> i <> 2209)
-        |> Array.map (fun (i,x) -> x) 
-    File.Delete(function_object_h)
-    File.WriteAllLines(function_object_h, function_object_lines)
+        match folder_name with
+        | "libxml2-2.7.8.win32" ->
+            let libxml2_bin = Path.Combine(ext_dir, folder_name, @"bin")
+            assert Directory.Exists(libxml2_bin)
+            let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
+            if not (path.Contains(libxml2_bin)) then
+                path <- path + sprintf ";%s" libxml2_bin;
+                Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
+        | _ -> ()
 
     let small_hpp = Path.Combine(ext_dir, "gemmi-0.3.3/include/gemmi/small.hpp")
     assert File.Exists(small_hpp)
@@ -138,27 +154,32 @@ let main args =
     File.Delete(small_hpp)
     File.WriteAllLines(small_hpp, small_lines)
 
-    let vtk_dir = Path.Combine(ext_dir, @"VTK-8.2.0\install")
-    let libxml2_dir = Path.Combine(ext_dir, @"libxml2-2.7.8.win32")
-    let zlib_dir = Path.Combine(ext_dir, @"zlib-1.2.13\install")
+    let function_object_h = Path.Combine(cgal_dir, "include/CGAL/Cartesian/function_objects.h")
+    assert File.Exists(function_object_h)
+    let function_object_lines = 
+        System.IO.File.ReadAllLines(function_object_h)
+        |> Array.indexed 
+        |> Array.filter (fun (i,x) -> i <> 2209)
+        |> Array.map (fun (i,x) -> x) 
+    File.Delete(function_object_h)
+    File.WriteAllLines(function_object_h, function_object_lines)
+
     for path_value in [|
         Path.Combine(cgal_dir, @"auxiliary\gmp\lib");
-        Path.Combine(vtk_dir, @"bin");
-        Path.Combine(boost_dir, @"lib64-msvc-14.1");
-        Path.Combine(libxml2_dir, @"bin");
-        Path.Combine(zlib_dir, @"bin"); |] do
+    |] do
         assert Directory.Exists(path_value)
         let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
         if not (path.Contains(path_value)) then
             path <- path + sprintf ";%s" path_value;
             Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
-    
+    Environment.SetEnvironmentVariable("CGAL_DIR", cgal_dir, EnvironmentVariableTarget.User);
+
     printfn "%s - %s" "Project Voronoi" "Configuring..."
-    let voronoi_build_dir = configure (Path.GetFullPath(@"..\")) [||]
+    let voronoi_build_dir = configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=ON"|]
     printfn "%s - %s" "Project Voronoi" "Installing..."
-    install voronoi_build_dir
+    install voronoi_build_dir build_type
     let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
-    let voronoi_bin = sprintf @";%s\bin" (Path.GetFullPath(@"..\install"))
+    let voronoi_bin = sprintf @";%s\bin" (Path.GetFullPath(@"..\install-dir"))
     if not (path.Contains(voronoi_bin)) then
         path <- path + voronoi_bin
         Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);

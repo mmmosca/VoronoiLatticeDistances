@@ -24,16 +24,24 @@ message(STATUS "Project directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # set <Package>_DIR env variable to find <Package>Config.cmake files
-find_package(Gemmi REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED)
-find_package(VTK 8.2.0 PATHS "${CMAKE_CURRENT_SOURCE_DIR}/External/VTK-8.2.0/install" REQUIRED)
-find_package(CGAL REQUIRED COMPONENTS Core MODULE)
+find_package(Gemmi MODULE REQUIRED)
+find_package(Eigen3 MODULE REQUIRED)
+
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/External/boost-1.81.0/install-dir")
+file(GLOB BOOST_LIBRARIES
+    "${CMAKE_CURRENT_SOURCE_DIR}/External/boost-1.81.0/install-dir/lib/*.lib"
+)
+find_package(Boost 1.81.0 REQUIRED)
+
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/External/VTK-8.2.0/install-dir")
+find_package(VTK 8.2.0 REQUIRED)
+
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/External/CGAL-4.14.3")
+find_package(CGAL REQUIRED COMPONENTS Core)
 
 set (WORKDIR "${CMAKE_BINARY_DIR}/Workdir"
 		CACHE INTERNAL "${PROJECT_NAME}: WorkDir" FORCE)
 
-# Includere i sottoprogetti.
 add_subdirectory ("CrystaLibrary")
 add_subdirectory ("Main")
 
