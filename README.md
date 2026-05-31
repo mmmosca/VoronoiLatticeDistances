@@ -6,24 +6,21 @@ The project has been compiled and run only on `Windows x64`.
 ## Installation
 1. Install Visual Studio (e.g. Community) choosing the following `single components`:
     - `.NET SDK`
-    - `.NET 7.0 Runtime`
-    - `MSVC v142 - C++ Build tools`
+    - `.NET 9.0 Runtime`
     - `MSVC v143 - C++ Build tools`
-    - `C++/CLI for Build Tools v142`
-    - `Windows 10 SDK (10.2.20348.0)`
+    - `C++/CLI for Build Tools`
+    - `Windows SDK`
     - `CMake C++ Tools for Windows`
     - `Git for Windows`
 
 2. Download the repository
 
 3. The software below must be installed through Windows installers:
+    - [7zip](https://www.7-zip.org/download.html) and add the path to the `PATH` env variable
+
     - [CGAL-4.14.3-Setup.exe](https://github.com/CGAL/cgal/releases/tag/releases%2FCGAL-4.14.3) 
     
-      Note: Install it in `VoronoiLatticeDistances\External\CGAL-4.14.3` folder and choose `64bit` binaries.
-
-    - [boost_1_69_0-msvc-14.1-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.69.0/)
-
-      Note: Install in `VoronoiLatticeDistances\External\boost_1_69_0` folder.
+      Note: Install it in `VoronoiLatticeDistances\External\CGAL-4.14.3` folder with `GMP` and `MPFR` options, and choose `64bit` binaries.
 
 3. Add the following environmental variables as User:
     - `VS_DIR`: Path to Visual Studio with all folders (e.g. `Microsoft Visual Studio\2022\Community`)
@@ -33,12 +30,12 @@ The project has been compiled and run only on `Windows x64`.
       "%VS_DIR%\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
       cd VoronoiLatticeDistances/windows-setup
       dotnet build
-      dotnet run
+      dotnet run Release
     ```
 6. Restart the command prompt and run the executables: `voronoilatticedistances.exe` or `voronoilatticedistances_off.exe`.
 
 ## Usage
-To compute correctly the metrics, it is required that all input `CIF` files contain the primitive unit cell.
+To compute correctly the metrics, it is required that all input `CIF` files contain the `primitive unit cell`.
 Run the executable without parameters for the usage. There are following some examples.
 ### Produce Voronoi-based metrics from CIF files on 5 threads
 ```
