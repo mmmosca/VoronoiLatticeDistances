@@ -1,5 +1,5 @@
 # Voronoi-based Lattice Distances
-Voronoi-based Lattice Distances encodes crystal lattices to Voronoi Domains and runs Voronoi-based metrics to compare them. More details on the used metrics can be found in our paper published in the Crystal Research & Technology Journal: [Voronoi-Based Similarity Distances between Arbitrary Crystal Lattices](https://onlinelibrary.wiley.com/doi/10.1002/crat.201900197).
+Voronoi-based Lattice Distances encodes Crystal Lattices to Voronoi Domains and runs Voronoi-based metrics to quantify their Similarity. More details on the used metrics can be found in our paper published in the Crystal Research & Technology Journal: [Voronoi-Based Similarity Distances between Arbitrary Crystal Lattices](https://onlinelibrary.wiley.com/doi/10.1002/crat.201900197).
 
 The project has been compiled and run only on `Windows x64`.
 
@@ -15,24 +15,17 @@ The project has been compiled and run only on `Windows x64`.
 
 2. Download the repository
 
-3. The software below must be installed through Windows installers:
-    - [7zip](https://www.7-zip.org/download.html) and add the path to the `PATH` env variable
-
-    - [CGAL-4.14.3-Setup.exe](https://github.com/CGAL/cgal/releases/tag/releases%2FCGAL-4.14.3) 
-    
-      Note: Install it in `VoronoiLatticeDistances\External\CGAL-4.14.3` folder with `GMP` and `MPFR` options, and choose `64bit` binaries.
-
-3. Add the following environmental variables as User:
+2. Add the following environmental variables as User:
     - `VS_DIR`: Path to Visual Studio with all folders (e.g. `Microsoft Visual Studio\2022\Community`)
 
-5. Run the following in a `Command Prompt` (no PowerShell) to install it:
+3. Run the following in a `Command Prompt` (no PowerShell) to install it:
     ```
       "%VS_DIR%\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
       cd VoronoiLatticeDistances/windows-setup
       dotnet build
       dotnet run Release
     ```
-6. Restart the command prompt and run the executables: `voronoilatticedistances.exe` or `voronoilatticedistances_off.exe`.
+4. Restart the command prompt and run the executables: `voronoilatticedistances.exe` or `voronoilatticedistances_off.exe`.
 
 ## Usage
 To compute correctly the metrics, it is required that all input `CIF` files contain the `primitive unit cell`.
