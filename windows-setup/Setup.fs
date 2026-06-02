@@ -17,6 +17,7 @@
  * Author Marco M. Mosca, email: marcomichele.mosca@gmail.com
 *)
 open System.IO
+open System.IO.Compression
 open System.Net.Http
 open System.Diagnostics
 open System
@@ -61,7 +62,7 @@ let configure (src_dir:string) (variables: string array) =
      
     build_dir
 
-let install (build_dir: string) (build_type: string) =
+let install (build_type: string) (build_dir: string) =
     [|
         "--build"; build_dir;
         "--target"; "install";
@@ -70,119 +71,116 @@ let install (build_dir: string) (build_type: string) =
     |> start_process "cmake"
 
 let unzip (output_folder: string) (file: string) =
-    [| "x"; "-tzip"; file; sprintf "-o%s" output_folder |]
-    |> start_process "7z"
+    ZipFile.ExtractToDirectory(
+        file,
+        output_folder,
+        true
+    )
 
+let addToUserEnvPath (pathToFolder:string) =
+    assert Directory.Exists(pathToFolder)
+    let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
+    if not (path.Contains(path)) then
+        path <- path + sprintf ";%s" pathToFolder;
+        Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
 
 [<EntryPoint>]
 let main args =
     let build_type = args[0]
     let ext_dir = Path.GetFullPath(@"..\External")
     assert Directory.Exists(ext_dir)
-    let cgal_dir = Path.Combine(ext_dir, @"CGAL-4.14.3")
+    let http = new HttpClient()
 
     assert Directory.Exists(ext_dir)
     let src_nobuild_deps = [|
         (@"https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip", @"eigen-3.3.7");
         (@"https://github.com/project-gemmi/gemmi/archive/refs/tags/v0.3.3.zip", @"gemmi-0.3.3");
         (@"https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/npackd/org.xmlsoft.LibXML-2.7.8.zip", @"libxml2-2.7.8.win32");
+        (@"https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.14.3/CGAL-4.14.3.zip", @"CGAL-4.14.3");
+        (@"https://github.com/CGAL/cgal/releases/download/v5.2/CGAL-5.2-win64-auxiliary-libraries-gmp-mpfr.zip", @"auxiliary");
     |]
+    let cgal_dir = Path.Combine(ext_dir, @"CGAL-4.14.3")
+    for dep, folder_name in src_nobuild_deps do
+        match Directory.Exists(Path.Combine(ext_dir,folder_name)) with
+        | false ->
+            printfn "%s - %s" folder_name "Downloading..."
+            let path_to_file = download ext_dir http dep
+            printfn "%s - %s" folder_name "Unzipping..."
+            unzip ext_dir path_to_file
+            File.Delete(path_to_file)
+            match folder_name with
+            | "gemmi-0.3.3" ->
+                let small_hpp = Path.Combine(ext_dir, "gemmi-0.3.3/include/gemmi/small.hpp")
+                assert File.Exists(small_hpp)
+                let new_lines = [| 
+                    @"  if (len > 1) {";
+                    @"    if (label[len + 1] == '-')";
+                    @"      dest->charge = -dest->charge;";
+                    @"  }"
+                |]
+                let small_lines = 
+                    System.IO.File.ReadAllLines(small_hpp)
+                    |> Array.indexed 
+                    |> Array.filter (fun (i,x) -> i <> 69 && i <> 70)
+                    |> Array.map (fun (i,x) -> x) 
+                    |> Array.insertManyAt 69 new_lines
+                File.Delete(small_hpp)
+                File.WriteAllLines(small_hpp, small_lines)
+            | "libxml2-2.7.8.win32" ->
+                Path.Combine(ext_dir, folder_name, @"bin") |> addToUserEnvPath 
+            | "CGAL-4.14.3" ->
+                let function_object_h = Path.Combine(cgal_dir, "include/CGAL/Cartesian/function_objects.h")
+                assert File.Exists(function_object_h)
+                let function_object_lines = 
+                    System.IO.File.ReadAllLines(function_object_h)
+                    |> Array.indexed 
+                    |> Array.filter (fun (i,x) -> i <> 2209)
+                    |> Array.map (fun (i,x) -> x) 
+                File.Delete(function_object_h)
+                File.WriteAllLines(function_object_h, function_object_lines)
+                Environment.SetEnvironmentVariable("CGAL_DIR", cgal_dir, EnvironmentVariableTarget.User);
+            | "auxiliary" ->
+                Directory.Delete(Path.Combine(cgal_dir, folder_name, @"gmp"), true)
+                Directory.Move(Path.Combine(ext_dir, folder_name, @"gmp"), Path.Combine(cgal_dir, folder_name, @"gmp"))
+                Directory.Delete(Path.Combine(ext_dir, folder_name))
+                Path.Combine(cgal_dir, @"auxiliary\gmp\lib") |> addToUserEnvPath
+            | _ -> ()
+        | true -> ()
 
     let src_deps = [|
         (@"https://github.com/boostorg/boost/releases/download/boost-1.81.0/boost-1.81.0.zip", @"boost-1.81.0", [|@"-DBUILD_SHARED_LIBS=ON";@"-DBUILD_TESTING=OFF"|]);
         (@"https://www.zlib.net/zlib132.zip", @"zlib-1.3.2", [||]);
         (@"https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip", @"VTK-8.2.0", [|@"-DBUILD_EXAMPLES=OFF";@"-DBUILD_TESTING=OFF"|]);
     |]
-    let http = new HttpClient()
     for dep, folder_name, variables in src_deps do
-        printfn "%s - %s" folder_name "Downloading..."
-        let path_to_file = download ext_dir http dep
-        printfn "%s - %s" folder_name "Unzipping..."
-        unzip ext_dir path_to_file
-        File.Delete(path_to_file)
-        printfn "%s - %s" folder_name "Configuring..."
-        let build_dir = configure (Path.Combine(ext_dir, folder_name)) variables
-        printfn "%s - %s" folder_name "Installing..."
-        install build_dir build_type
-        let path_value = Path.Combine(ext_dir, folder_name, @"install-dir\bin");
-        assert Directory.Exists(path_value)
-        let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
-        if not (path.Contains(path_value)) then
-            path <- path + sprintf ";%s" path_value;
-            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
-        match folder_name with
-        | "boost-1.81.0" ->
-            // Rename Boost library files for a naming issue in Boost 
-            let bintorename = Path.Combine(ext_dir, folder_name, @"install-dir\bin") |> Directory.GetFiles
-            let libtorename = Path.Combine(ext_dir, folder_name, @"install-dir\lib") |> Directory.GetFiles
-            Array.append libtorename bintorename
-            |> Array.iter (
-                fun f -> File.Copy(f, f.Replace(@"vc144",@"vc143"))
-            )
-        | _ -> ()
+        match Directory.Exists(Path.Combine(ext_dir,folder_name)) with
+        | false ->
+            printfn "%s - %s" folder_name "Downloading..."
+            let path_to_file = download ext_dir http dep
+            printfn "%s - %s" folder_name "Unzipping..."
+            unzip ext_dir path_to_file
+            File.Delete(path_to_file)
+            printfn "%s - %s" folder_name "Installing..."
+            configure (Path.Combine(ext_dir, folder_name)) variables
+            |> install build_type
+            Path.Combine(ext_dir, folder_name, @"install-dir\bin");
+            |> addToUserEnvPath
 
-    for dep, folder_name in src_nobuild_deps do
-        printfn "%s - %s" folder_name "Downloading..."
-        let path_to_file = download ext_dir http dep
-        printfn "%s - %s" folder_name "Unzipping..."
-        unzip ext_dir path_to_file
-        File.Delete(path_to_file)
-        match folder_name with
-        | "libxml2-2.7.8.win32" ->
-            let libxml2_bin = Path.Combine(ext_dir, folder_name, @"bin")
-            assert Directory.Exists(libxml2_bin)
-            let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
-            if not (path.Contains(libxml2_bin)) then
-                path <- path + sprintf ";%s" libxml2_bin;
-                Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
-        | _ -> ()
+            match folder_name with
+            | "boost-1.81.0" ->
+                // Rename Boost library files for a naming issue in Boost 
+                let bintorename = Path.Combine(ext_dir, folder_name, @"install-dir\bin") |> Directory.GetFiles
+                let libtorename = Path.Combine(ext_dir, folder_name, @"install-dir\lib") |> Directory.GetFiles
+                Array.append libtorename bintorename
+                |> Array.iter (
+                    fun f -> File.Copy(f, f.Replace(@"vc144",@"vc143"))
+                )
+            | _ -> ()
+        | true -> ()
 
-    let small_hpp = Path.Combine(ext_dir, "gemmi-0.3.3/include/gemmi/small.hpp")
-    assert File.Exists(small_hpp)
-    let new_lines = [| 
-        @"  if (len > 1) {";
-        @"    if (label[len + 1] == '-')";
-        @"      dest->charge = -dest->charge;";
-        @"  }"
-    |]
-    let small_lines = 
-        System.IO.File.ReadAllLines(small_hpp)
-        |> Array.indexed 
-        |> Array.filter (fun (i,x) -> i <> 69 && i <> 70)
-        |> Array.map (fun (i,x) -> x) 
-        |> Array.insertManyAt 69 new_lines
-    File.Delete(small_hpp)
-    File.WriteAllLines(small_hpp, small_lines)
-
-    let function_object_h = Path.Combine(cgal_dir, "include/CGAL/Cartesian/function_objects.h")
-    assert File.Exists(function_object_h)
-    let function_object_lines = 
-        System.IO.File.ReadAllLines(function_object_h)
-        |> Array.indexed 
-        |> Array.filter (fun (i,x) -> i <> 2209)
-        |> Array.map (fun (i,x) -> x) 
-    File.Delete(function_object_h)
-    File.WriteAllLines(function_object_h, function_object_lines)
-
-    for path_value in [|
-        Path.Combine(cgal_dir, @"auxiliary\gmp\lib");
-    |] do
-        assert Directory.Exists(path_value)
-        let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
-        if not (path.Contains(path_value)) then
-            path <- path + sprintf ";%s" path_value;
-            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
-    Environment.SetEnvironmentVariable("CGAL_DIR", cgal_dir, EnvironmentVariableTarget.User);
-
-    printfn "%s - %s" "Project Voronoi" "Configuring..."
-    let voronoi_build_dir = configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=ON"|]
     printfn "%s - %s" "Project Voronoi" "Installing..."
-    install voronoi_build_dir build_type
-    let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
-    let voronoi_bin = sprintf @";%s\bin" (Path.GetFullPath(@"..\install-dir"))
-    if not (path.Contains(voronoi_bin)) then
-        path <- path + voronoi_bin
-        Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
+    configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=ON"|] |> install build_type
+    Path.GetFullPath(@"..\install-dir") |> addToUserEnvPath
     printfn "%s - %s" "Project Voronoi" "Completed!"
     printfn "%s - %s" "Project Voronoi" "Restart your command prompt to use the executables!"
     0
