@@ -23,7 +23,7 @@ The project has been compiled and run only on `Windows x64`.
       "%VS_DIR%\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
       cd VoronoiLatticeDistances/windows-setup
       dotnet build
-      dotnet run Release
+      dotnet run install Release
     ```
 4. Restart the command prompt and run the executables: `voronoilatticedistances.exe` or `voronoilatticedistances_off.exe`.
 
@@ -87,4 +87,17 @@ The dendrogram and the heatmap of the Voronoi-based metrics can be generated wit
 
 ```
 RScript.exe .\Scripts\make_dendrogram_heatmap.R [csv file]
+```
+
+
+## Tests
+You can install dependencies, project and run tests as follows
+```
+dotnet run tests
+```
+...or 
+```
+dotnet run installdeps Debug
+dotnet run install Debug
+ctest --test-dir build --build-config Debug --build-target install --extra-verbose
 ```

@@ -70,6 +70,15 @@ let install (build_type: string) (build_dir: string) =
     |]
     |> start_process "cmake"
 
+let ctest (build_type: string) (build_dir: string) =
+    [|
+        "--test-dir"; build_dir;
+        "--build-target"; "install";
+        "--build-config"; build_type;
+        "--extra-verbose"
+    |]
+    |> start_process "ctest"
+
 let unzip (output_folder: string) (file: string) =
     ZipFile.ExtractToDirectory(
         file,
@@ -84,14 +93,9 @@ let addToUserEnvPath (pathToFolder:string) =
         path <- path + sprintf ";%s" pathToFolder;
         Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
 
-[<EntryPoint>]
-let main args =
-    let build_type = args[0]
-    let ext_dir = Path.GetFullPath(@"..\External")
-    assert Directory.Exists(ext_dir)
+let installDependencies ext_dir build_type =
     let http = new HttpClient()
 
-    assert Directory.Exists(ext_dir)
     let src_nobuild_deps = [|
         (@"https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip", @"eigen-3.3.7");
         (@"https://github.com/project-gemmi/gemmi/archive/refs/tags/v0.3.3.zip", @"gemmi-0.3.3");
@@ -191,9 +195,43 @@ let main args =
             | _ -> ()
         | true -> ()
 
-    printfn "%s - %s" "Project Voronoi" "Installing..."
-    configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=ON"|] |> install build_type
-    Path.GetFullPath(@"..\install-dir") |> addToUserEnvPath
-    printfn "%s - %s" "Project Voronoi" "Completed!"
-    printfn "%s - %s" "Project Voronoi" "Restart your command prompt to use the executables!"
+[<EntryPoint>]
+let main args =
+    let subcommand = args[0]
+    let ext_dir = Path.GetFullPath(@"..\External")
+
+    match subcommand with
+    | "installdeps" ->
+        let build_type = args[1]
+        match build_type with
+        | "Debug" | "Release" -> 
+            installDependencies ext_dir build_type
+        | _ ->
+            failwithf "Unknown build type: %s" subcommand
+    | "install" ->
+        let build_type = args[1]
+        match build_type with
+        | "Debug" ->
+            installDependencies ext_dir build_type
+            printfn "%s - %s" "Project Voronoi" "Installing..."
+            configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=OFF";@"-DBUILD_TESTING=ON"|] |> install build_type
+        | "Release" -> 
+            installDependencies ext_dir build_type
+            printfn "%s - %s" "Project Voronoi" "Installing..."
+            configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=ON";@"-DBUILD_TESTING=OFF"|] |> install build_type
+        | _ ->
+            failwithf "Unknown build type: %s" subcommand
+        Path.GetFullPath(@"..\install-dir") |> addToUserEnvPath
+        printfn "%s - %s" "Project Voronoi" "Completed!"
+        printfn "%s - %s" "Project Voronoi" "Restart your command prompt to use the executables!"
+    | "tests" ->
+        let build_type = "Debug"
+        installDependencies ext_dir build_type
+        configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=OFF";@"-DBUILD_TESTING=ON"|]
+        |> fun bdir ->
+            install build_type bdir
+            ctest build_type bdir
+    | _ -> 
+        failwithf "Unknown command: %s" subcommand
+
     0
