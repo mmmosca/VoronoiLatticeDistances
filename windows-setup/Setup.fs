@@ -142,7 +142,6 @@ let main args =
             | "auxiliary" ->
                 Directory.Delete(Path.Combine(cgal_dir, folder_name, @"gmp"), true)
                 Directory.Move(Path.Combine(ext_dir, folder_name, @"gmp"), Path.Combine(cgal_dir, folder_name, @"gmp"))
-                Directory.Delete(Path.Combine(ext_dir, folder_name))
                 Path.Combine(cgal_dir, @"auxiliary\gmp\lib") |> addToUserEnvPath
             | _ -> ()
         | true -> ()
@@ -150,7 +149,21 @@ let main args =
     let src_deps = [|
         (@"https://github.com/boostorg/boost/releases/download/boost-1.81.0/boost-1.81.0.zip", @"boost-1.81.0", [|@"-DBUILD_SHARED_LIBS=ON";@"-DBUILD_TESTING=OFF"|]);
         (@"https://www.zlib.net/zlib132.zip", @"zlib-1.3.2", [||]);
-        (@"https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip", @"VTK-8.2.0", [|@"-DBUILD_EXAMPLES=OFF";@"-DBUILD_TESTING=OFF"|]);
+        (@"https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip", @"VTK-8.2.0", [|
+            @"-DBUILD_EXAMPLES=OFF";
+            @"-DBUILD_TESTING=OFF";
+            @"-DVTK_BUILD_ALL_MODULES=OFF";
+            @"-DModule_vtkCommonCore=ON";
+            @"-DModule_vtkCommonDataModel=ON";
+            @"-DModule_vtkCommonColor=ON";
+            @"-DModule_vtkCommonTransforms=ON";
+            @"-DModule_vtkFiltersGeneral=ON";
+            @"-DModule_vtkFiltersSources=ON";
+            @"-DModule_vtkIOXML=ON";
+            @"-DModule_vtkInteractionStyle=ON";
+            @"-DModule_vtkRenderingCore=ON";
+            @"-DModule_vtkRenderingOpenGL2=ON";
+        |]);
     |]
     for dep, folder_name, variables in src_deps do
         match Directory.Exists(Path.Combine(ext_dir,folder_name)) with

@@ -34,7 +34,18 @@ file(GLOB BOOST_LIBRARIES
 find_package(Boost 1.81.0 REQUIRED)
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/External/VTK-8.2.0/install-dir")
-find_package(VTK 8.2.0 REQUIRED)
+find_package(VTK 8.2.0 REQUIRED COMPONENTS
+    vtkCommonCore
+    vtkCommonDataModel
+    vtkCommonColor
+    vtkCommonTransforms
+    vtkFiltersGeneral
+    vtkFiltersSources
+    vtkIOXML
+    vtkInteractionStyle
+    vtkRenderingCore
+    vtkRenderingOpenGL2
+)
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/External/CGAL-4.14.3")
 find_package(CGAL REQUIRED COMPONENTS Core)
