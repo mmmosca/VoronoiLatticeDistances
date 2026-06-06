@@ -232,7 +232,7 @@ let main args =
             configure (Path.GetFullPath(@"..\")) [|@"-DSHARED=ON";@"-DBUILD_TESTING=OFF"|] |> install build_type
         | _ ->
             failwithf "Unknown build type: %s" subcommand
-        Path.GetFullPath(@"..\install-dir") |> addToUserEnvPath
+        Path.GetFullPath(@"..\install-dir\bin") |> addToUserEnvPath
         printfn "%s - %s" "Project Voronoi" "Completed!"
         printfn "%s - %s" "Project Voronoi" "Restart your command prompt to use the executables!"
     | "tests" ->

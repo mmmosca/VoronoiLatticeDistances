@@ -1,5 +1,7 @@
 # Project changes
 
+## [0.6.1]
+    - Fix the installation directory in user Path for install targets
 ## [0.6.0]
     - Cache dependencies in CI
     - Set the project version to 0.6.0
