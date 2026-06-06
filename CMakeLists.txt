@@ -56,3 +56,8 @@ set (WORKDIR "${CMAKE_BINARY_DIR}/Workdir"
 add_subdirectory ("CrystaLibrary")
 add_subdirectory ("Main")
 
+if (BUILD_TESTING)
+    enable_testing()
+    include(GoogleTest)
+    add_subdirectory ("Tests")
+endif()
