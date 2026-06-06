@@ -89,7 +89,7 @@ let unzip (output_folder: string) (file: string) =
 let addToUserEnvPath (pathToFolder:string) =
     assert Directory.Exists(pathToFolder)
     let mutable path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User);
-    if not (path.Contains(path)) then
+    if not (path.Contains(pathToFolder)) then
         path <- path + sprintf ";%s" pathToFolder;
         Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.User);
 
@@ -148,7 +148,16 @@ let installDependencies ext_dir build_type =
                 Directory.Move(Path.Combine(ext_dir, folder_name, @"gmp"), Path.Combine(cgal_dir, folder_name, @"gmp"))
                 Path.Combine(cgal_dir, @"auxiliary\gmp\lib") |> addToUserEnvPath
             | _ -> ()
-        | true -> ()
+        | true ->
+            match folder_name with
+            | "libxml2-2.7.8.win32" ->
+                Path.Combine(ext_dir, folder_name, @"bin") |> addToUserEnvPath
+            | "CGAL-4.14.3" ->
+                Environment.SetEnvironmentVariable("CGAL_DIR", cgal_dir, EnvironmentVariableTarget.User);
+            | "auxiliary" ->
+                Path.Combine(cgal_dir, @"auxiliary\gmp\lib") |> addToUserEnvPath
+            | _ -> ()
+
 
     let src_deps = [|
         (@"https://github.com/boostorg/boost/releases/download/boost-1.81.0/boost-1.81.0.zip", @"boost-1.81.0", [|@"-DBUILD_SHARED_LIBS=ON";@"-DBUILD_TESTING=OFF"|]);
@@ -180,7 +189,7 @@ let installDependencies ext_dir build_type =
             printfn "%s - %s" folder_name "Installing..."
             configure (Path.Combine(ext_dir, folder_name)) variables
             |> install build_type
-            Path.Combine(ext_dir, folder_name, @"install-dir\bin");
+            Path.Combine(ext_dir, folder_name, @"install-dir\bin")
             |> addToUserEnvPath
 
             match folder_name with
@@ -193,7 +202,9 @@ let installDependencies ext_dir build_type =
                     fun f -> File.Copy(f, f.Replace(@"vc144",@"vc143"))
                 )
             | _ -> ()
-        | true -> ()
+        | true ->
+            Path.Combine(ext_dir, folder_name, @"install-dir\bin")
+            |> addToUserEnvPath
 
 [<EntryPoint>]
 let main args =
