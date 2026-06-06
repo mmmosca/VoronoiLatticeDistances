@@ -93,11 +93,13 @@ RScript.exe .\Scripts\make_dendrogram_heatmap.R [csv file]
 ## Tests
 You can install dependencies, project and run tests as follows
 ```
+cd VoronoiLatticeDistances/windows-setup
 dotnet run tests
 ```
 ...or 
 ```
 dotnet run installdeps Debug
 dotnet run install Debug
-ctest --test-dir build --build-config Debug --build-target install --extra-verbose
+cd ../build
+ctest --build-config Debug --build-target install --extra-verbose
 ```
