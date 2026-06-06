@@ -1,5 +1,6 @@
 # Project changes
 
+    - Cache dependencies in CI
 ## [0.5.0]
     - Add tests for the PeriodicPointCloud and Lattice classes
     - Install and use only the necessary VTK modules
