@@ -30,9 +30,9 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/External
-        key: setup-${{ matrix.os }}-x64
+        key: setup-deps-${{ matrix.os }}-${{ hashFiles('dependencies.json') }}
         restore-keys: |
-          setup-${{ matrix.os }}-x64
+          setup-deps-${{ matrix.os }}-${{ hashFiles('dependencies.json') }}
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/windows-setup

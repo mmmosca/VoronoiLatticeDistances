@@ -1,5 +1,7 @@
 # Project changes
 
+## [0.7.0]
+    - Add dependencies file for smart cache in CI
     - Add PeriodicPointCloud tests for 2D space
 ## [0.6.1]
     - Fix the installation directory in user Path for install targets
