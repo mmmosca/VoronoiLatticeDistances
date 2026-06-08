@@ -1,4 +1,4 @@
-#include "tests.h"
+#include <gtest/gtest.h>
 #include "crystalstructure.h"
 
 TEST(LatticeTest, spanTheLattice)
