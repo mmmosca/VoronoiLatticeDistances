@@ -1,5 +1,6 @@
 # Project changes
 
+    - Add PeriodicPointCloud tests for 2D space
 ## [0.6.1]
     - Fix the installation directory in user Path for install targets
     - Bump version to 0.6.1
