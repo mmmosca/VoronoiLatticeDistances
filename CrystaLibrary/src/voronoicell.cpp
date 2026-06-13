@@ -358,7 +358,6 @@ void VoronoiCellMetrics::getOffsetOverRotation(VoronoiCell v1, VoronoiCell v2, s
 		const Kernel_simple::Segment_3 segment = Kernel_simple::Segment_3(origin, p1);
 
 		for (std::vector<int>& face : faces_lcc2) {
-			//std::cout << "\tPlane Points: " << face[0] << ", " << face[1] << ", " << face[2] << std::endl;
 			// A face is defined at least by 3 points
 			Kernel_simple::Point_3 f1(CGAL::to_double(points_lcc2[face[0]].x()), CGAL::to_double(points_lcc2[face[0]].y()), CGAL::to_double(points_lcc2[face[0]].z()));
 			Kernel_simple::Point_3 f2(CGAL::to_double(points_lcc2[face[1]].x()), CGAL::to_double(points_lcc2[face[1]].y()), CGAL::to_double(points_lcc2[face[1]].z()));
@@ -367,9 +366,7 @@ void VoronoiCellMetrics::getOffsetOverRotation(VoronoiCell v1, VoronoiCell v2, s
 			CGAL::cpp11::result_of<Kernel_simple::Intersect_3(Kernel_simple::Segment_3, Kernel_simple::Plane_3)>::type result = CGAL::intersection(segment, plane);
 			if (result) {
 				// Vertex p is outside the polyhedron
-
 				double curr_distancetopoly_vertices = sqrt(CGAL::to_double(CGAL::squared_distance(p1, plane)));
-
 				if (offset_overotation == -1) {
 					offset_overotation = curr_distancetopoly_vertices;
 				}
@@ -381,7 +378,6 @@ void VoronoiCellMetrics::getOffsetOverRotation(VoronoiCell v1, VoronoiCell v2, s
 			}
 			else {
 				// Vertex p is inside the polyhedron
-				//std::cout << "\t\tNo Intersection..." << std::endl;
 			}
 		}
 	}
@@ -442,13 +438,11 @@ VoronoiMetricResult VoronoiCellMetrics::getOffset_Parallel_std(VoronoiCell v1, V
 	std::vector<VoronoiMetricResult> offset_results(this->threads);
 	std::vector<std::thread> pool(this->threads);
 	int start=0, end=0, samples_per_thread = this->rotation_samples.size() / this->threads;
-	//std::cout << "Rotation samples: " << this->rotation_samples.size() << " - Samples per thread: " << samples_per_thread << std::endl;
 
 	for (int i = 0; i < this->threads; ++i) {
 		start = (i * samples_per_thread);
 		if (i == this->threads - 1) end = this->rotation_samples.size();
 		else end = (start + samples_per_thread);
-		//std::cout << "Start: " << start << " - End: " << end << std::endl;
 
 		// Get the offset over a set of rotations
 		auto f = std::bind(&VoronoiCellMetrics::getOffsetOverRotationsSet, this, v1, v2, i, start, end, std::ref(offset_results[i]));
@@ -459,15 +453,12 @@ VoronoiMetricResult VoronoiCellMetrics::getOffset_Parallel_std(VoronoiCell v1, V
 	}
 	// Get the minimum over all rotations: Offset(v1,v2)
 	int min_offset_index = 0;
-	//std::cout << offset_results[0].distance_result << std::endl;
 	for (int i = 1; i < offset_results.size(); ++i) {
-		//std::cout << offset_results[i].distance_result << std::endl;
 		if (offset_results[i].distance_result < offset_results[min_offset_index].distance_result) {
 			min_offset_index = i;
 		}
 	}
 	offset_overAllRotations = offset_results[min_offset_index];
-	//std::cout << "Minimum: " << offset_overAllRotations.distance_result << std::endl;
 	return offset_overAllRotations;
 }
 
@@ -485,12 +476,9 @@ void VoronoiCellMetrics::getScaleOverRotation(VoronoiCell v1, VoronoiCell v2, st
 		double distance_o_p = sqrt(CGAL::to_double(CGAL::squared_distance(origin, p1))), min_distance_o_pint = -1, curr_distance_o_pint;
 		const Kernel_simple::Ray_3 ray = Kernel_simple::Ray_3(origin, p1);
 		bool found = false;
-		//std::cout << "Vertex: " << p_3 << std::endl;
 		// Pick the intersection of the Ray_p with the closest face ( min distance(O, F_face intesected Ray_p) )
 
 		for (auto& face : faces_lcc2) {
-
-			//std::cout << "\tPlane Points: " << points_lcc2[face[0]] << ", " << points_lcc2[face[1]] << ", " << points_lcc2[face[2]] << std::endl;
 			Kernel_simple::Point_3 f1(CGAL::to_double(points_lcc2[face[0]][0]), CGAL::to_double(points_lcc2[face[0]][1]), CGAL::to_double(points_lcc2[face[0]][2]));
 			Kernel_simple::Point_3 f2(CGAL::to_double(points_lcc2[face[1]][0]), CGAL::to_double(points_lcc2[face[1]][1]), CGAL::to_double(points_lcc2[face[1]][2]));
 			Kernel_simple::Point_3 f3(CGAL::to_double(points_lcc2[face[2]][0]), CGAL::to_double(points_lcc2[face[2]][1]), CGAL::to_double(points_lcc2[face[2]][2]));
@@ -517,7 +505,6 @@ void VoronoiCellMetrics::getScaleOverRotation(VoronoiCell v1, VoronoiCell v2, st
 			}
 			else {
 				// Vertex p is inside the polyhedron
-				//std::cout << "\t\tNo Intersection..." << std::endl;
 			}
 		}
 		// If found a face intersection: Pick max (Scale(P1,P2))
@@ -592,13 +579,11 @@ VoronoiMetricResult VoronoiCellMetrics::getScale_Parallel_std(VoronoiCell v1, Vo
 
 	std::vector<std::thread> pool(this->threads);
 	int start = 0, end = 0, samples_per_thread = this->rotation_samples.size() / this->threads;
-	//std::cout << "Rotation samples: " << this->rotation_samples.size() << " - Samples per thread: " << samples_per_thread << std::endl;
 
 	for (int i = 0; i < this->threads; ++i) {
 		start = (i * samples_per_thread);
 		if (i == this->threads - 1) end = this->rotation_samples.size();
 		else end = (start + samples_per_thread);
-		//std::cout << "Start: " << start << " - End: " << end << std::endl;
 
 		// Get the offset over a set of rotations
 		auto f = std::bind(&VoronoiCellMetrics::getScaleOverRotationsSet, this, v1, v2, i, start, end, std::ref(scale_results[i]));
@@ -609,16 +594,13 @@ VoronoiMetricResult VoronoiCellMetrics::getScale_Parallel_std(VoronoiCell v1, Vo
 	}
 	// Get the minimum over all rotations: Scale(v1,v2)
 	int min_scale_index = 0;
-	//std::cout << scale_results[0].distance_result << std::endl;
 	for (int i = 1; i < scale_results.size(); ++i) {
-		//std::cout << scale_results[i].distance_result << std::endl;
 		if (scale_results[i].distance_result < scale_results[min_scale_index].distance_result) {
 			min_scale_index = i;
 		}
 	}
 
 	scale_overAllRotations = scale_results[min_scale_index];
-	//std::cout << "Minimum: " << scale_overAllRotations.distance_result << std::endl;
 	return scale_overAllRotations;
 }
 
@@ -638,7 +620,6 @@ void VoronoiCellMetrics::generateUniformRotationSamples(int intervals) {
 			}
 		}
 	}
-	//std::cout << "Number of rotation samples: " << this->rotation_samples.size() << std::endl;
 }
 
 VoronoiMetricResult VoronoiCellMetrics::getExtendedHausdorffDistance(VoronoiCell v1, VoronoiCell v2)
@@ -721,10 +702,8 @@ void VoronoiCellMetrics::updateExtendedHausdorffDistanceMatrix() {
 				this->optimalRotations[i][j] = result_EHD;
 				this->optimalRotations[j][i] = result_EHD;
 			}
-			std::cout << '\r' << "Pair Count: " << ++pair_count;
 		}
 	}
-	std::cout << std::endl;
 }
 
 void VoronoiCellMetrics::updateScaleInvariantDistanceMatrix() {
@@ -755,11 +734,8 @@ void VoronoiCellMetrics::updateScaleInvariantDistanceMatrix() {
 				this->optimalRotations[i][j] = result_SID;
 				this->optimalRotations[j][i] = result_SID;
 			}
-			std::cout << '\r' <<  "Pair Count: "<< ++pair_count;
 		}
 	}
-	std::cout << std::endl;
-
 }
 
 void VoronoiCellMetrics::writeExtendedHausdorffDistanceMatrixToCSV(std::string filename) {

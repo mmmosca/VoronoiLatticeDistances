@@ -76,11 +76,4 @@ void updateToFiniteSimplicialComplex(Linear_Complex_Combinatorial_Map& lc_combin
 */
 void removeIncorrectGeometryFaces(Linear_Complex_Combinatorial_Map& lc_combinatorial_map);
 
-
-void display_finite_characteristics(Delaunay_Triangulation& DT);
-
-void display_finite_characteristics(Linear_Complex_Combinatorial_Map& lc_combinatorial_map,
-	Delaunay_Triangulation& DT,
-	std::map<typename Delaunay_Triangulation::Cell_handle, typename Linear_Complex_Combinatorial_Map::Dart_handle>& cell_to_dart);
-
 #endif // !_LINEARCOMPLEX_H

@@ -18,7 +18,6 @@
 */
 #include <unitcellreduction.h>
 
-
 bool reduceVector_Buerger(Eigen::Vector3d* toReduce, Eigen::Vector3d* refVector, Eigen::Vector3d** shortest, int *matrix_entry) {
 	bool reduced = false;
 	Eigen::Vector3d ref = *refVector;
@@ -59,18 +58,16 @@ bool reduceVector_Niggli(Eigen::Vector3d* toReduce, Eigen::Vector3d* refVector, 
 	sign = (cos_redref < 0) ? 1 : -1;
 	// Round the fractional projection to avoid floating point problem in the while guard
 	fractional_proj = roundToNthDecimal((norm_toReduce / norm_ref) * cos_redref, 50);
-	//fractional_proj = (norm_toReduce / norm_ref) * cos_redref;
 	ref_waiting_angle_character = 2 * ref.dot(*waiting);
 	toreduce_waiting_character = 2 * toReduce->dot(*waiting);
 	// Add a condition when the swapped couple have been already tested, if their fractional_proj was 0.5 and this is the viceversa case -> do not reduce
 	// In tuples add case 4: it comes the couple of vector have been already reduced and the viceversa should be tested
 	while ((abs(fractional_proj) > 0.5) || ((fractional_proj == 0.5) && (2 * toreduce_waiting_character < ref_waiting_angle_character)) || ((fractional_proj == -0.5) && (ref_waiting_angle_character < 0))) {
-		//std::cout << "INSIDE LOOP" << std::endl;
 		if (abs(fractional_proj) == 0.5) {
 			// Fix to avoid over-reduction with face-diagonal case. It could continue to inf since abs(fractional_proj) == 0.5 for two consequent iterations.
 			if (face_diagonal_check) break;
 			else face_diagonal_check = true;
-			//std::cout << "Face diagonal case" << std::endl;
+			Logger::debug("Face diagonal case");
 		}
 		for (int i = 0; i < size; ++i) {
 			(*toReduce)(i) = (*toReduce)(i) + sign * ref(i);
@@ -79,7 +76,6 @@ bool reduceVector_Niggli(Eigen::Vector3d* toReduce, Eigen::Vector3d* refVector, 
 		norm_toReduce = toReduce->norm();
 		cos_redref = toReduce->dot(ref) / (norm_toReduce * norm_ref);
 		fractional_proj = roundToNthDecimal((norm_toReduce / norm_ref) * cos_redref, 50);
-		//fractional_proj = (norm_toReduce / norm_ref) * cos_redref;
 
 		++(*matrix_entry);
 		reduced = true;
@@ -134,34 +130,25 @@ bool redirectAxis(std::vector<Eigen::Vector3d*> basis, std::map<Eigen::Vector3d*
 		if (cos_b2b3 < 0) {
 			redirected = true;
 			b1_entry = -1;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD", b1_ref, "acute", b1_entry);
-#endif
+			Logger::debug("Redirect - RD: " + std::to_string(b1_ref) + " -> acute, " + std::to_string(b1_entry));
 		};
 		// Turn the orientation of b2: obtuse -> acute
 		if (cos_b1b3 < 0) {
 			redirected = true;
 			b2_entry = -1;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD", b2_ref, "acute", b2_entry);
-#endif
+			Logger::debug("Redirect - RD: " + std::to_string(b2_ref) + " -> acute, " + std::to_string(b2_entry));
 		};
 		// Turn the orientation of b3: obtuse -> acute
 		if (cos_b1b2 < 0) {
 			redirected = true;
 			b3_entry = -1;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD", b3_ref, "acute", b3_entry);
-#endif
+			Logger::debug("Redirect - RD: " + std::to_string(b3_ref) + " -> acute, " + std::to_string(b3_entry));
 		};
-
-
 	}
 	// All angles obtuse -> no changes
 	else if ((sign_cos_b1b2 == -1) && (sign_cos_b1b3 == -1) && (sign_cos_b2b3 == -1)) {
 		// leave all obtuse
 	}
-
 	// orientation == -1
 	// case 1: 1 obtuse, 2 acute -> all obtuse
 	// Solution: Look for the vector opposite to the obtuse angle and change its orientation
@@ -175,46 +162,34 @@ bool redirectAxis(std::vector<Eigen::Vector3d*> basis, std::map<Eigen::Vector3d*
 		if (cos_b1b2 > 0) {
 			redirected = true;
 			b3_entry = -1;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD", b3_ref, "obtuse", b3_entry);
-#endif
+			Logger::debug("Redirect - RD: " + std::to_string(b3_ref) + " -> obtuse, " + std::to_string(b3_entry));
 		}
 		// b3 opposite angle is 90 degrees: change its orientation
 		if (cos_b1b2 == 0) {
 			right = b3_ref;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD-right", b3_ref, "obtuse", b3_entry);
-#endif
+			Logger::debug("Redirect - RD-right: " + std::to_string(b3_ref) + " -> obtuse, " + std::to_string(b3_entry));
 		};
 		// Turn the orientation of b2: acute -> obtuse
 		if (cos_b1b3 > 0) {
 			redirected = true;
 			b2_entry = -1;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD", b2_ref, "obtuse", b2_entry);
-#endif
+			Logger::debug("Redirect - RD: " + std::to_string(b2_ref) + " -> obtuse, " + std::to_string(b2_entry));
 		}
 		// b2 opposite angle is 90 degrees: change its orientation
 		if (cos_b1b3 == 0) {
 			right = b2_ref;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD-right", b2_ref, "obtuse", b2_entry);
-#endif
+			Logger::debug("Redirect - RD-right: " + std::to_string(b2_ref) + " -> obtuse, " + std::to_string(b2_entry));
 		};
 		// Turn the orientation of b1: acute -> obtuse
 		if (cos_b2b3 > 0) {
 			redirected = true;
 			b1_entry = -1;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD", b1_ref, "obtuse", b1_entry);
-#endif
+			Logger::debug("Redirect - RD: " + std::to_string(b1_ref) + " -> obtuse, " + std::to_string(b1_entry));
 		}
 		// b1 opposite angle is 90 degrees: change its orientation
 		if (cos_b2b3 == 0) {
 			right = b1_ref;
-#ifdef DEBUG
-			PRINTREDUCEINFO("RD-right", b1_ref, "obtuse", b1_entry);
-#endif
+			Logger::debug("Redirect - RD-right: " + std::to_string(b1_ref) + " -> obtuse, " + std::to_string(b1_entry));
 		};
 	}
 
@@ -278,13 +253,12 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 	// int ids of vectors, matrix entry to transform the vector to be reduced
 	int ref, red, wait, matrix_entry;
 	bool reduced, face_diagonal, redirected;
-	//std::cout << "Old axis (columns):\n" << axis_matrix << std::endl;
 
 	final_transf_matrix.setIdentity();
 	std::sort(axis_vector.begin(), axis_vector.end(), EigenNormCompare);
 	// Start to reduce the longest with respect to the smallest
 	reducing_room.push(std::make_tuple(axis_vector[2], axis_vector[1], axis_vector[0], 1));
-	//std::cout << "\t|--> Reduce X with respect to (->) Y" << std::endl;
+	Logger::debug("Notation: reduce X with respect to (->) Y");
 	while (!reducing_room.empty()) {
 		//	Get the top element reference
 		std::tuple<Eigen::Vector3d*, Eigen::Vector3d*, Eigen::Vector3d*, int> current_tuple = reducing_room.front();
@@ -306,8 +280,6 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 		final_transf_matrix = final_transf_matrix * transf_matrix;
 
 		reduced = reduceVector_Niggli(toReduce, refVector, waiting, face_diagonal, &matrix_entry);
-		//std::cout << face_diagonal << std::endl;
-		//reduced = reduceVector(toReduce, refVector, &shortest, &matrix_entry);
 
 		// Update the transformation matrix
 		if (reduced) {
@@ -319,10 +291,12 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 
 		// Save information about cell that is being reduced or not
 		total_reduced = total_reduced || reduced || redirected;
-#ifdef DEBUG
-		if (reduced) { PRINTREDUCEINFO("Check Y", red, ref, -matrix_entry); }
-		else { PRINTREDUCEINFO("Check N", red, ref, ""); }
-#endif
+		if (reduced) { 
+			Logger::debug("Check Y: " + std::to_string(red) + " -> " + std::to_string(ref) + ", " + std::to_string(-matrix_entry));
+		}
+		else { 
+			Logger::debug("Check N: " + std::to_string(red) + " -> " + std::to_string(ref));
+		}
 
 		std::sort(axis_vector.begin(), axis_vector.end(), EigenNormCompare);
 		//	SWITCH: Check the pointers of the first and the second and check the integer code:
@@ -348,7 +322,10 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 		}
 		case 1: {
 			if (reduced) {
-				//PRINTSTEPINFO(1, ref, refVector, red, toReduce, wait, waiting);
+				Logger::debug("|--> Step 1:\n\t"\
+					+ to_string(ref) + ":\t" + std::to_string(refVector->x()) + ',' + std::to_string(refVector->y()) + ',' + std::to_string(refVector->z()) + "\n\t"\
+					+ to_string(red) + ":\t" + std::to_string(toReduce->x()) + ',' + std::to_string(toReduce->y()) + ',' + std::to_string(toReduce->z()) + "\n\t"\
+					+ to_string(wait) + ":\t" + std::to_string(waiting->x()) + ',' + std::to_string(waiting->y()) + ',' + std::to_string(waiting->z()));
 				reducing_room.push(std::make_tuple(axis_vector[2], axis_vector[1], axis_vector[0], 1));
 			}
 			else {
@@ -360,12 +337,18 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 		}
 		case 2: {
 			if (reduced) {
-				//PRINTSTEPINFO(2, ref, refVector, red, toReduce, wait, waiting);
+				Logger::debug("|--> Step 2:\n\t"\
+					+ to_string(ref) + ":\t" + std::to_string(refVector->x()) + ',' + std::to_string(refVector->y()) + ',' + std::to_string(refVector->z()) + "\n\t"\
+					+ to_string(red) + ":\t" + std::to_string(toReduce->x()) + ',' + std::to_string(toReduce->y()) + ',' + std::to_string(toReduce->z()) + "\n\t"\
+					+ to_string(wait) + ":\t" + std::to_string(waiting->x()) + ',' + std::to_string(waiting->y()) + ',' + std::to_string(waiting->z()));
 				reducing_room.push(std::make_tuple(axis_vector[2], axis_vector[1], axis_vector[0], 1));
 			}
 			else {
 				// Second couple -> Check the viceversa and push the shortest one with the last one
-				//PRINTSTEPINFO(2, red, toReduce, wait, waiting, ref, refVector);
+				Logger::debug("|--> Step 2:\n\t"\
+					+ to_string(red) + ":\t" + std::to_string(toReduce->x()) + ',' + std::to_string(toReduce->y()) + ',' + std::to_string(toReduce->z()) + "\n\t"\
+					+ to_string(wait) + ":\t" + std::to_string(waiting->x()) + ',' + std::to_string(waiting->y()) + ',' + std::to_string(waiting->z()) + "\n\t"\
+					+ to_string(ref) + ":\t" + std::to_string(refVector->x()) + ',' + std::to_string(refVector->y()) + ',' + std::to_string(refVector->z()));
 				reducing_room.push(std::make_tuple(axis_vector[0], axis_vector[2], axis_vector[1], 0));
 				reducing_room.push(std::make_tuple(axis_vector[1], axis_vector[0], axis_vector[2], 3));
 			}
@@ -374,12 +357,14 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 		case 3: {
 			// Last step: first 2 couple have been fixed -> check the last combination
 			if (reduced) {
-				//PRINTSTEPINFO(3, ref, refVector, red, toReduce, wait, waiting);
+				Logger::debug("|--> Step 3:\n\t"\
+					+ to_string(ref) + ":\t" + std::to_string(refVector->x()) + ',' + std::to_string(refVector->y()) + ',' + std::to_string(refVector->z()) + "\n\t"\
+					+ to_string(red) + ":\t" + std::to_string(toReduce->x()) + ',' + std::to_string(toReduce->y()) + ',' + std::to_string(toReduce->z()) + "\n\t"\
+					+ to_string(wait) + ":\t" + std::to_string(waiting->x()) + ',' + std::to_string(waiting->y()) + ',' + std::to_string(waiting->z()));
 				// Enqueue to start from the beginning to check if they need to be reduced each other
 				reducing_room.push(std::make_tuple(axis_vector[2], axis_vector[1], axis_vector[0], 1));
 			}
 			else {
-				//std::cout << "\t|--> End" << std::endl;
 				// Push just to check the viceversa
 				reducing_room.push(std::make_tuple(axis_vector[0], axis_vector[1], axis_vector[2], 0));
 			}
@@ -423,9 +408,7 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 				reducing_room.push(std::make_tuple(axis_vector[2], axis_vector[1], axis_vector[0], 1));
 				// If the diagonal changes it stands for "reduced"
 				total_reduced = true;
-#ifdef DEBUG
-				PRINTREDUCEINFO("BD", axis_id, "Body-Diagonal", "");
-#endif
+				Logger::debug("Reduce - BD: " + std::to_string(axis_id) + " -> Body-Diagonal");
 			}
 		}
 	}
@@ -448,7 +431,18 @@ Eigen::Matrix3d reduceUnitCell(std::vector<double> &cell_parameters, Eigen::Matr
 		}
 	}
 
+	Logger::debug("Old axis matrix:\n\t"\
+		+ std::to_string(axis_matrix.col(0).x()) + ',' + std::to_string(axis_matrix.col(1).x()) + ',' + std::to_string(axis_matrix.col(2).x()) + "\n\t"\
+		+ std::to_string(axis_matrix.col(0).y()) + ',' + std::to_string(axis_matrix.col(1).y()) + ',' + std::to_string(axis_matrix.col(2).y()) + "\n\t"\
+		+ std::to_string(axis_matrix.col(0).z()) + ',' + std::to_string(axis_matrix.col(1).z()) + ',' + std::to_string(axis_matrix.col(2).z()));
+	Logger::debug("New axis matrix:\n\t"\
+		+ std::to_string(new_axis.col(0).x()) + ',' + std::to_string(new_axis.col(1).x()) + ',' + std::to_string(new_axis.col(2).x()) + "\n\t"\
+		+ std::to_string(new_axis.col(0).y()) + ',' + std::to_string(new_axis.col(1).y()) + ',' + std::to_string(new_axis.col(2).y()) + "\n\t"\
+		+ std::to_string(new_axis.col(0).z()) + ',' + std::to_string(new_axis.col(1).z()) + ',' + std::to_string(new_axis.col(2).z()));
+	Logger::debug("Transformation matrix:\n\t"\
+		+ std::to_string(transform.col(0).x()) + ',' + std::to_string(transform.col(1).x()) + ',' + std::to_string(transform.col(2).x()) + "\n\t"\
+		+ std::to_string(transform.col(0).y()) + ',' + std::to_string(transform.col(1).y()) + ',' + std::to_string(transform.col(2).y()) + "\n\t"\
+		+ std::to_string(transform.col(0).z()) + ',' + std::to_string(transform.col(1).z()) + ',' + std::to_string(transform.col(2).z()));
+	
 	return new_axis;
-	//std::cout << "New axis (columns):\n" << new_axis << std::endl;
-	//std::cout << "Transformation matrix:\n" << transform << std::endl;
 }

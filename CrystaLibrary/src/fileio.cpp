@@ -98,18 +98,3 @@ std::vector<std::string> OFFFile::splitByDelimiters(std::string s, std::regex re
 		tokens.push_back((*i).str());
 	return tokens;
 }
-
-void OFFFile::printFile() {
-	std::cout << this->points.size() << '\t' << this->faces.size() << std::endl;
-	for (auto& p : this->points) {
-		std::cout << std::to_string(p[0]) << ',' << std::to_string(p[1]) << ',' << std::to_string(p[2]) << std::endl;
-	}
-	for (int f = 0; f < this->faces.size(); ++f) {
-		std::cout << std::to_string(this->indeces_counts[f]) << '\t';
-		std::cout << std::to_string(this->faces[f][0]);
-		for (int ind = 1; ind < this->faces[f].size(); ++ind) {
-			std::cout << ',' << std::to_string(this->faces[f][ind]);
-		}
-		std::cout << std::endl;
-	}
-}

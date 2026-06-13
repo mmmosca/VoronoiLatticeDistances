@@ -54,9 +54,6 @@ bool Lattice::updateReducedCellParameters() {
 	bool total_reduced = false;
 	
 	assert(this->cell_parameters.size() == 6);
-#ifdef DEBUG
-	std::cout << "\tLattice:" << std::endl;
-#endif
 	reduced_axis = reduceUnitCell(this->cell_parameters, reduced_transform, total_reduced);
 	// The following conversion is needed to fix A as X axis
 	fixedX_axis = getTransformationMatrixFromFractionalToCartesian(this->cell_parameters);
@@ -99,7 +96,6 @@ void Lattice::spanTheLattice(int n, bool positive) {
 			this->updateCoefficientsForEveryDirection(k);
 		}
 		else {
-			//std::cout << -k << " " << k+1 << std::endl;
 			this->updateCoefficientsFromRange(-k,k+1);
 		}
 	}
@@ -113,17 +109,4 @@ void Lattice::clearTheLattice() {
 	this->v_a.setZero();
 	this->v_b.setZero();
 	this->v_c.setZero();
-}
-
-void Lattice::print_lattice_info() {
-	this->print_info();
-	std::cout << "Cell parameters details:" << std::endl;
-	for (auto &p : this->cell_parameters) {
-		std::cout << to_string(p) << std::endl;
-	}
-	std::cout << "Cartesian vectors details (by row):" << std::endl;
-
-	std::cout << this->v_a.transpose() << std::endl;
-	std::cout << this->v_b.transpose() << std::endl;
-	std::cout << this->v_c.transpose() << std::endl;
 }

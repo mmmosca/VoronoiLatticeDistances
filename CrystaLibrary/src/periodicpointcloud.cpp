@@ -213,28 +213,3 @@ void PeriodicPointCloud::clearCombinations() {
 	this->g_combination_count = 0;
 
 }
-
-void PeriodicPointCloud::print_info() {
-	std::cout << "Generators: " << this->generator_count << std::endl;
-	for (auto gen : this->G) {
-		std::cout << '\t' << gen.transpose() << std::endl;
-	}
-	std::cout << "Coefficients: " << this->coef_count << std::endl;
-	std::cout << '\t';
-	for (auto c : this->C) {
-		std::cout << c << " ";
-	}
-	std::cout << std::endl;
-	std::cout << "Coefficients combinations: " << this->c_combination_count << std::endl;
-	for (auto elem : this->C_combinations) {
-		std::cout << '\t' << elem.transpose() << std::endl;
-	}
-
-	std::cout << std::endl;
-	std::cout << "Generators combinations: " << this->g_combination_count << std::endl;
-	for (auto elem : this->G_combinations) {
-		std::cout << '\t' << elem.transpose() << std::endl;
-	}
-
-	return;
-}

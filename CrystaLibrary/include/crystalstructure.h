@@ -79,9 +79,6 @@ public:
 
 	// Clear the instance of the Lattice
 	void clearTheLattice();
-
-	//Print info
-	void print_lattice_info();
 };
 
 #endif // !_STRUCTURE_H

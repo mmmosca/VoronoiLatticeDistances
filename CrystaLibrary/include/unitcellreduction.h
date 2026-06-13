@@ -19,7 +19,7 @@
 #ifndef _UNITCELLREDUCTION_H
 #define _UNITCELLREDUCTION_H
 
-//#define DEBUG
+#include "logging.h"
 #include <vector>
 #include <Eigen/Dense>
 #include <math.h>

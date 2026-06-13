@@ -39,7 +39,6 @@ public:
 	OFFFile(std::string file_path);
 	std::vector<std::vector<double>> getPoints() { return this->points; }
 	std::vector<std::vector<int>> getFaces() { return this->faces; }
-	void printFile();
 };
 
 #endif // !_FILEIO_H

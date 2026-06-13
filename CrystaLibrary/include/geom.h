@@ -64,11 +64,6 @@ typedef CGAL::Side_of_triangle_mesh<CGAL::Polyhedron_3<Kernel>, Kernel> Point_in
 
 #define M_PI           3.14159265358979323846
 #define ROUND_D	20
-#define PRINTSTEPINFO(step, r1, v1, r2, v2, r3, v3)	std::cout << "|--> Step " << (step) << ":\n" << \
-													"\t" << to_string((r1)) << ":\t" << (v1)->transpose() << ",\n" << \
-													"\t" << to_string((r2)) << ":\t" << (v2)->transpose() << ",\n" << \
-													"\t" << to_string((r3)) << ":\t" << (v3)->transpose() << std::endl;
-#define PRINTREDUCEINFO(message, r1, r2, k)	std::cout << "\t|--> " << message << ": " << (r1) << "->" << (r2) << ", " << (k) << std::endl;
 #define math_sign(X) ((X) < 0.f) ? -1 : 1
 #define MAX(X,Y)	((X)>=(Y)) ? (X) : (Y)
 #define MIN(X,Y)	((X)<=(Y)) ? (X) : (Y)

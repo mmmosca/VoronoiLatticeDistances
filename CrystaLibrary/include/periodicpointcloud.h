@@ -88,9 +88,6 @@ public:
 
 	// Clear just the linear combinations
 	void clearCombinations();
-
-	//	Print some info about the PeriodicPointCloud class
-	void print_info();
 };
 
 #endif // !_PERIODICPOINTCLOUD_H

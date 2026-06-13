@@ -136,8 +136,6 @@ struct Plane_equation {
 			v_parallel_plane(v_sum + v_offset);
 		Kernel::Point_3 p_parallel_plane(v_parallel_plane[0], v_parallel_plane[1], v_parallel_plane[2]);
 		Kernel::Plane_3 new_plane(p_parallel_plane, v_sum);
-		//std::cout << "V_sum: " << v_sum << " V_sum_unit: " << v_sum_unit << " V_offset: " << v_offset  << " offset:" << sqrt(CGAL::to_double(v_offset.squared_length())) << "=" << offset << std::endl;
-
 
 		return new_plane;
 	}
@@ -172,8 +170,6 @@ public:
 	static void getPolyhedraData(Linear_Complex_Combinatorial_Map& lc_combinatorial_map, std::vector<std::vector<Point_CM>>& polyhedra_points, std::vector<std::vector<std::vector<int>>>& polyhedra_faces);
 
 	static void getPolyhedraData_New(Linear_Complex_Combinatorial_Map& lc_combinatorial_map, std::vector<std::vector<Point_CM>>& polyhedra_points, std::vector<std::vector<std::vector<int>>>& polyhedra_faces, Eigen::VectorXd& limit_inf, Eigen::VectorXd& limit_sup);
-
-	static Polyhedron getPolyhedronFromCombinatorialMap(Linear_Complex_Combinatorial_Map lc_combinatorial_map, bool subdivide = true);
 
 	/*
 	*	It is required that the Combinatorial maps have their centre at the origin (0,0,0)

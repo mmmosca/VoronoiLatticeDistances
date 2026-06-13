@@ -44,7 +44,6 @@ VoronoiDiagram::VoronoiDiagram(Lattice& lattice, int extend)
 		if (!vcell.hasCorrectGeometry()) continue;
 		vcell.updatePolyhedron();
 		this->voronoicells_vector.push_back(vcell);
-		//std::cout << "\nPolyhedra count: " << vcell_count <<" -- Polyhedron points' count:" << vcell.getPoints().size() << " -- Polyhedron faces' count: " << vcell.getFaces().size() << "\n";
 	}
 }
 
