@@ -1,20 +1,19 @@
-/*
- * Permission is granted to copy, distribute and/or modify the documents
- * in this directory and its subdirectories unless otherwise stated under
- * the terms of the GNU Free Documentation License, Version 1.1 or any later version 
- * published by the Free Software Foundation; with no Invariant Sections, 
- * no Front-Cover Texts and no Back-Cover Texts. A copy of the license 
- * is available at the website of the GNU Project.
- * The programs and code snippets in this directory and its subdirectories
- * are free software; you can redistribute them and/or modify it under the 
- * terms of the GNU General Public License as published by the Free Software 
- * Foundation; either version 2 of the License, or (at your option) any later
- * version. This code is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * Author Marco M. Mosca, email: marcomichele.mosca@gmail.com
+/*Copyright (C) 2018-2022,2026 Marco M. Mosca
+
+This file is part of VoronoiLatticeDistances.
+
+VoronoiLatticeDistances is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+VoronoiLatticeDistances is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 */
 #include <stdio.h>
 #include <iostream>
@@ -29,28 +28,32 @@
 #include <gemmi/smcif.hpp>
 #include <chrono>
 #include <ctime>
+#include "logging.h"
 
 
-
-#define PRINTUSAGE() printf("|--- USAGE ---|:\nVoronoi Computation is performed on a 3x3x3 extended domain of Niggli's Reduced Cell\n"\
-							"Required options:\n\t"\
-							"-inputdir [Input Folder with CIF files]\n\t"\
-							"-outputdir [Output Folder to write Results]\n"\
-							"Output options:\n\t"\
-							"-vol:\tOutputs .csv file with Voronoi Cell volume\n\t"\
-							"-vtp:\tOutputs .vtp file with Voronoi Cell of a Lattice (Paraview format file)\n\t"\
-							"-csv:\tOutputs .csv file with Lattice and Voronoi Cell points\n\t"\
-							"-off:\tOutputs .off file with Voronoi Cell verteces and faces\n\t"\
-							"-ds:\tOutputs .csv file with Scale Invariant Distance matrix (n x n) between all n crystal lattices\n\t"\
-							"-dh:\tOutputs .csv file with Extended Hausdorff Distance matrix (n x n) between all n crystal lattices\n"\
-							"Optional commands:\n\t"\
-							"-intervals [integer n (default n=2)]:\tIt affects the number of rotation samples to be considered for metric computations (number of rotations: 4*pi^2*n^3)\n\t"\
-							"-threads [integer t (default t=1)]:\tRotation samples are divided among t threads \n");
+std::string usage{"|--- USAGE ---|:\nVoronoi Computation is performed on a 3x3x3 extended domain of Niggli's Reduced Cell\n"\
+				"Required options:\n\t"\
+				"-inputdir [Input Folder with CIF files]\n\t"\
+				"-outputdir [Output Folder to write Results]\n"\
+				"Output options:\n\t"\
+				"-vol:\tOutputs .csv file with Voronoi Cell volume\n\t"\
+				"-vtp:\tOutputs .vtp file with Voronoi Cell of a Lattice (Paraview format file)\n\t"\
+				"-csv:\tOutputs .csv file with Lattice and Voronoi Cell points\n\t"\
+				"-off:\tOutputs .off file with Voronoi Cell verteces and faces\n\t"\
+				"-ds:\tOutputs .csv file with Scale Invariant Distance matrix (n x n) between all n crystal lattices\n\t"\
+				"-dh:\tOutputs .csv file with Extended Hausdorff Distance matrix (n x n) between all n crystal lattices\n"\
+				"Optional commands:\n\t"\
+				"-intervals [integer n (default n=2)]:\tIt affects the number of rotation samples to be considered for metric computations (number of rotations: 4*pi^2*n^3)\n\t"\
+				"-threads [integer t (default t=1)]:\tRotation samples are divided among t threads \n\t"\
+				"-debug\tEnable debug message logging\n\t"\
+				"-verbose\tEnable more verbose message logging"};
 
 
 int main(int argc, char* argv[]) {
 	std::string input_dir, output_dir;
 	CommandLine cmd;
+	int n_threads = 1;
+	int intervals = 2;
 	bool INPUTDIR_OPT = false;
 	bool OUTPUTDIR_OPT = false;
 	bool VOLUME_OPT = false;
@@ -61,11 +64,8 @@ int main(int argc, char* argv[]) {
 	bool OFF_OPT = false;
 	bool OUTPUT_OPT = false;
 
-	int intervals = 2;
-	int n_threads = 1;
-
 	char* w;
-	while ((w = cmd.mygetoptW(argc, argv, "inputdir:|outputdir:|vol|dh|ds|vtp|csv|off|intervals:|threads:|")) != NULL) {
+	while ((w = cmd.mygetoptW(argc, argv, "inputdir:|outputdir:|vol|dh|ds|vtp|csv|off|intervals:|threads:|debug|verbose|help|")) != NULL) {
 		if (strcmp(w, "inputdir") == 0) {
 			input_dir.assign(cmd.myoptarg);
 			INPUTDIR_OPT = true;
@@ -114,18 +114,28 @@ int main(int argc, char* argv[]) {
 			OUTPUT_OPT = OUTPUT_OPT || OFF_OPT;
 			continue;
 		}
+		if (strcmp(w, "debug") == 0) {
+			Logger::setLevel(LogLevel::LOGDEBUG);
+			continue;
+		}
+		if (strcmp(w, "verbose") == 0) {
+			Logger::setLevel(LogLevel::LOGINFO);
+			continue;
+		}
+		if (strcmp(w, "help") == 0) {
+			Logger::error("USAGE\n" + usage);
+			exit(EXIT_SUCCESS);
+		}
 	}
 
 	if (!(INPUTDIR_OPT && OUTPUTDIR_OPT)) {
-		PRINTUSAGE();
-		exit(EXIT_SUCCESS);
+		Logger::error("No input and output directory specified\n" + usage);
+		exit(EXIT_FAILURE);
 	}
 
 	if (!OUTPUT_OPT) {
-		std::cout << "No option for results detected. Please choose an option!\n" << std::endl;
-		PRINTUSAGE();
-		exit(EXIT_SUCCESS);
-
+		Logger::error("No option for results detected. Please choose an option!\n" + usage);
+		exit(EXIT_FAILURE);
 	}
 
 	std::string output_dir_vtp(output_dir + "/Voronoi_VTP"),
@@ -150,18 +160,18 @@ int main(int argc, char* argv[]) {
 		out_volume.open(volume_file_name);
 		out_volume << "ID,VORONOI_VOLUME\n";
 	}
-	
+
 	VoronoiCellMetrics voronoi_metrics;
 
 	auto start = std::chrono::system_clock::now();
-	std::cout << "Computing Voronoi Cells..." << std::endl;
+	Logger::info("Computing Voronoi Cells...");
 
 	int i = 0;
 	for (std::string& cif_filepath : gemmi::CifWalk(input_dir)) {
 		gemmi::cif::Document d = gemmi::cif::read_file(cif_filepath);
 		int block_index;
 		if ((block_index = CIFHandler::findValidBlockIndex(d)) == -1) {
-			std::cerr << "File corrupted: " + cif_filepath << std::endl;
+			Logger::warn("File corrupted: " + cif_filepath);
 			continue;
 		}
 
@@ -175,7 +185,7 @@ int main(int argc, char* argv[]) {
 		filename.erase(filename.find_last_of('.'), filename.length());
 
 		Lattice lattice;
-		std::cout << "\r" << ++i << " - Processing file: " << filename << std::flush;
+		Logger::info("Processing file: " + std::to_string(++i) + " - " + filename);
 		lattice.setCellParameters(cell_parameters);
 
 		VoronoiDiagram vd(lattice, 3);
@@ -211,12 +221,11 @@ int main(int argc, char* argv[]) {
 		out_volume.close();
 	}
 
-	std::cout << std::endl;
 	auto end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end - start;
 	int elapsed_s = elapsed_seconds.count();
 	int hours = floor(elapsed_s / 3600), minutes = floor(fmod(elapsed_s, 3600) / 60), seconds = fmod(elapsed_s, 60);
-	std::cout << "Elapsed time: " << hours << ':' << minutes << ':' << seconds << "s\n";
+	Logger::info("Elapsed time: " + std::to_string(hours) + ':' + std::to_string(minutes) + ':' + std::to_string(seconds));
 
 	/***********************\
 	|*** POST-PROCESSING ***|
@@ -228,7 +237,7 @@ int main(int argc, char* argv[]) {
 	voronoi_metrics.setSamplingMode(SamplingMode::UNIFORM);
 	voronoi_metrics.generateUniformRotationSamples(intervals);
 
-	std::cout << "Computing requested metrics..." << std::endl;
+	Logger::info("Computing requested metrics...");
 	start = std::chrono::system_clock::now();
 
 	if (EXTHAUSDORFF_OPT) {
@@ -241,14 +250,13 @@ int main(int argc, char* argv[]) {
 		voronoi_metrics.writeScaleInvariantDistanceMatrixToCSV(output_dir + std::string("/scaleinvariantdistancematrix"));
 	}
 
-	std::cout << std::endl;
 	end = std::chrono::system_clock::now();
 	elapsed_seconds = end - start;
 	elapsed_s = elapsed_seconds.count();
 	hours = floor(elapsed_s / 3600);
 	minutes = floor(fmod(elapsed_s, 3600) / 60);
 	seconds = fmod(elapsed_s, 60);
-	std::cout << "Elapsed time: " << hours << ':' << minutes << ':' << seconds << "s\n";
+	Logger::info("Elapsed time: " + std::to_string(hours) + ':' + std::to_string(minutes) + ':' + std::to_string(seconds));
 
 	return 0;
 }

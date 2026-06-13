@@ -1,20 +1,19 @@
-/*
- * Permission is granted to copy, distribute and/or modify the documents
- * in this directory and its subdirectories unless otherwise stated under
- * the terms of the GNU Free Documentation License, Version 1.1 or any later version 
- * published by the Free Software Foundation; with no Invariant Sections, 
- * no Front-Cover Texts and no Back-Cover Texts. A copy of the license 
- * is available at the website of the GNU Project.
- * The programs and code snippets in this directory and its subdirectories
- * are free software; you can redistribute them and/or modify it under the 
- * terms of the GNU General Public License as published by the Free Software 
- * Foundation; either version 2 of the License, or (at your option) any later
- * version. This code is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * Author Marco M. Mosca, email: marcomichele.mosca@gmail.com
+/*Copyright (C) 2018-2022,2026 Marco M. Mosca
+
+This file is part of VoronoiLatticeDistances.
+
+VoronoiLatticeDistances is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+VoronoiLatticeDistances is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 */
 #include <linearcomplex.h>
 
@@ -49,13 +48,9 @@ void set_geometry_of_dual(Linear_Complex_Combinatorial_Map& lc_dual_combinatoria
 	{
 		if (!lc_combinatorial_map.is_infinite(it->first)) {
 			lc_dual_combinatorial_map.set_vertex_attribute(it->second, lc_dual_combinatorial_map.create_vertex_attribute(lc_combinatorial_map.dual(it->first)));
-			//Point_CM p = lc_dual_combinatorial_map.point(it->second);
-			//std::cout << "\nnot infinite: " << p << std::endl;
 		}
 		else {
 			lc_dual_combinatorial_map.set_vertex_attribute(it->second, lc_dual_combinatorial_map.create_vertex_attribute());
-			//Point_CM p = lc_dual_combinatorial_map.point(it->second);
-			//std::cout << "\ninfinite: " << p << std::endl;
 		}		
 	}
 }
@@ -92,8 +87,6 @@ void removeInfinteCellsFromDual(Linear_Complex_Combinatorial_Map &dual_cm, Dart_
 	{
 		Point_CM p = v->point();
 		if ((p[0] >= INF_COMPONENT) || (p[0] <= -INF_COMPONENT) || (p[1] >= INF_COMPONENT) || (p[1] <= -INF_COMPONENT) || (p[2] >= INF_COMPONENT) || (p[2] <= -INF_COMPONENT)) {
-
-			//std::cout << "Infinite point by verteces: " << p[0] << " " << p[1] << " " << p[2] << std::endl;
 			CGAL_assertion(dual_cm.is_removable<3>(v->dart()));
 			dual_cm.remove_cell<3>(v->dart());
 		}
@@ -129,8 +122,6 @@ void removeIncorrectGeometryFaces(Linear_Complex_Combinatorial_Map& lc_combinato
 		while (!lc_combinatorial_map.is_marked(dh_edges, mark_toremove)) {
 			Point_CM p = lc_combinatorial_map.point(dh_edges);
 			if ((p[0] >= INF_COMPONENT) || (p[0] <= -INF_COMPONENT) || (p[1] >= INF_COMPONENT) || (p[1] <= -INF_COMPONENT) || (p[2] >= INF_COMPONENT) || (p[2] <= -INF_COMPONENT)) {
-				
-				//std::cout << "Infinite point by faces: " << p[0] << " " << p[1] << " " << p[2] << std::endl; ;
 				CGAL_assertion(lc_combinatorial_map.is_removable<2>(face_dart));
 				toremove.push(face_dart);
 			}
@@ -154,59 +145,8 @@ void removeIncorrectGeometryFaces(Linear_Complex_Combinatorial_Map& lc_combinato
 	{
 		Point_CM p = v->point();
 		if ((p[0] >= INF_COMPONENT) || (p[0] <= -INF_COMPONENT) || (p[1] >= INF_COMPONENT) || (p[1] <= -INF_COMPONENT) || (p[2] >= INF_COMPONENT) || (p[2] <= -INF_COMPONENT)) {
-
-			//std::cout << "Infinite point by verteces: " << p[0] << " " << p[1] << " " << p[2] << std::endl;
 			CGAL_assertion(lc_combinatorial_map.is_removable<3>(v->dart()));
 			lc_combinatorial_map.remove_cell<3>(v->dart());
 		}
 	}
-
-}
-
-
-void display_finite_characteristics(Delaunay_Triangulation& DT) {
-	std::cout << "Delaunay Triangulation ->" << 
-		" 0-cells:" << DT.number_of_vertices() <<
-		" 1-cells:" << DT.number_of_finite_edges() <<
-		" 2-cells:" << DT.number_of_finite_facets() <<
-		" 3-cells:" << DT.number_of_finite_cells() << std::endl;
-}
-
-void display_finite_characteristics(Linear_Complex_Combinatorial_Map& lc_combinatorial_map,
-	Delaunay_Triangulation& DT,
-	std::map<typename Delaunay_Triangulation::Cell_handle, typename Linear_Complex_Combinatorial_Map::Dart_handle>& cell_to_dart) {
-	
-	std::map<typename Linear_Complex_Combinatorial_Map::Dart_handle, typename Delaunay_Triangulation::Cell_handle> dart_to_cell;
-	std::map<typename Linear_Complex_Combinatorial_Map::Dart_handle, typename Delaunay_Triangulation::Cell_handle>::iterator it;
-
-	for (auto& couple : cell_to_dart) {
-		dart_to_cell[couple.second] = couple.first;
-	}
-
-	int count_3cells = 0, count_2cells = 0, count_1cells = 0, count_0cells = 0, notrecognized = 0, infinite_darts= 0;
-	for (Linear_Complex_Combinatorial_Map::One_dart_per_cell_range<3>::iterator cell_dart = lc_combinatorial_map.one_dart_per_cell<3>().begin(),
-		cell_dart_end = lc_combinatorial_map.one_dart_per_cell<3>().end(); cell_dart != cell_dart_end; ++cell_dart)
-	{
-		
-		it = dart_to_cell.find(cell_dart);
-		if (it != dart_to_cell.end()) {
-			if (!DT.is_infinite(dart_to_cell[cell_dart])) {
-				++count_3cells;
-				/*
-				for (Linear_Complex_Combinatorial_Map::One_dart_per_cell_range<2>::iterator face_dart = lc_combinatorial_map.one_dart_per_cell<2>().begin(),
-					face_dart_end = lc_combinatorial_map.one_dart_per_cell<2>().end(); face_dart != face_dart_end; ++face_dart)
-				{
-				}
-				*/
-			}
-			else {
-				++infinite_darts;
-			}
-		}
-		else {
-			++notrecognized;
-		}		
-	}
-
-	std::cout << "Combinatorial map -> 3-cells:" << count_3cells << ", Known and Infinite darts:" << infinite_darts << ", Unknown:" << notrecognized << std::endl;
 }

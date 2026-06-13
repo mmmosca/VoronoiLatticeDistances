@@ -1,4 +1,4 @@
-/*Copyright (C) 2018-2022,2026 Marco M. Mosca
+/*Copyright (C) 2026 Marco M. Mosca
 
 This file is part of VoronoiLatticeDistances.
 
@@ -15,15 +15,33 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef _KERNEL_H
-#define _KERNEL_H
+#ifndef _LOGGING_H
+#define _LOGGING_H
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Extended_cartesian.h>
-#include <CGAL/Simple_cartesian.h>
+#include <string>
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Simple_cartesian<double> Kernel_simple;
-typedef CGAL::Extended_cartesian< CGAL::Lazy_exact_nt<CGAL::Gmpq> > Kernel_Ext;
+enum class LogLevel {
+    LOGDEBUG = 0,
+    LOGINFO = 1,
+    LOGWARNING = 2,
+    LOGERROR = 3,
+    LOGFATAL = 4
+};
 
-#endif
+class Logger
+{
+public:
+    static void init(const std::string& filename);
+
+    static void setLevel(LogLevel inputLevel);
+    static void debug(const std::string& message);
+    static void info(const std::string& message);
+    static void warn(const std::string& message);
+    static void error(const std::string& message);
+
+private:
+    static void log(const std::string& level,
+                    const std::string& message);
+};
+
+#endif // !_LOGGING_H

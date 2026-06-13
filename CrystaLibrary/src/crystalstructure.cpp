@@ -1,20 +1,19 @@
-/*
- * Permission is granted to copy, distribute and/or modify the documents
- * in this directory and its subdirectories unless otherwise stated under
- * the terms of the GNU Free Documentation License, Version 1.1 or any later version 
- * published by the Free Software Foundation; with no Invariant Sections, 
- * no Front-Cover Texts and no Back-Cover Texts. A copy of the license 
- * is available at the website of the GNU Project.
- * The programs and code snippets in this directory and its subdirectories
- * are free software; you can redistribute them and/or modify it under the 
- * terms of the GNU General Public License as published by the Free Software 
- * Foundation; either version 2 of the License, or (at your option) any later
- * version. This code is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * Author Marco M. Mosca, email: marcomichele.mosca@gmail.com
+/*Copyright (C) 2018-2022,2026 Marco M. Mosca
+
+This file is part of VoronoiLatticeDistances.
+
+VoronoiLatticeDistances is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+VoronoiLatticeDistances is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 */
 #include "crystalstructure.h"
 
@@ -54,9 +53,6 @@ bool Lattice::updateReducedCellParameters() {
 	bool total_reduced = false;
 	
 	assert(this->cell_parameters.size() == 6);
-#ifdef DEBUG
-	std::cout << "\tLattice:" << std::endl;
-#endif
 	reduced_axis = reduceUnitCell(this->cell_parameters, reduced_transform, total_reduced);
 	// The following conversion is needed to fix A as X axis
 	fixedX_axis = getTransformationMatrixFromFractionalToCartesian(this->cell_parameters);
@@ -99,7 +95,6 @@ void Lattice::spanTheLattice(int n, bool positive) {
 			this->updateCoefficientsForEveryDirection(k);
 		}
 		else {
-			//std::cout << -k << " " << k+1 << std::endl;
 			this->updateCoefficientsFromRange(-k,k+1);
 		}
 	}
@@ -113,17 +108,4 @@ void Lattice::clearTheLattice() {
 	this->v_a.setZero();
 	this->v_b.setZero();
 	this->v_c.setZero();
-}
-
-void Lattice::print_lattice_info() {
-	this->print_info();
-	std::cout << "Cell parameters details:" << std::endl;
-	for (auto &p : this->cell_parameters) {
-		std::cout << to_string(p) << std::endl;
-	}
-	std::cout << "Cartesian vectors details (by row):" << std::endl;
-
-	std::cout << this->v_a.transpose() << std::endl;
-	std::cout << this->v_b.transpose() << std::endl;
-	std::cout << this->v_c.transpose() << std::endl;
 }

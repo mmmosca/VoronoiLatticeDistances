@@ -1,20 +1,19 @@
-/*
- * Permission is granted to copy, distribute and/or modify the documents
- * in this directory and its subdirectories unless otherwise stated under
- * the terms of the GNU Free Documentation License, Version 1.1 or any later version 
- * published by the Free Software Foundation; with no Invariant Sections, 
- * no Front-Cover Texts and no Back-Cover Texts. A copy of the license 
- * is available at the website of the GNU Project.
- * The programs and code snippets in this directory and its subdirectories
- * are free software; you can redistribute them and/or modify it under the 
- * terms of the GNU General Public License as published by the Free Software 
- * Foundation; either version 2 of the License, or (at your option) any later
- * version. This code is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * Author Marco M. Mosca, email: marcomichele.mosca@gmail.com
+/*Copyright (C) 2018-2022,2026 Marco M. Mosca
+
+This file is part of VoronoiLatticeDistances.
+
+VoronoiLatticeDistances is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+VoronoiLatticeDistances is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 */
 #ifndef _GEOMETRYSTRUCTURE_H
 #define _GEOMETRYSTRUCTURE_H
@@ -136,8 +135,6 @@ struct Plane_equation {
 			v_parallel_plane(v_sum + v_offset);
 		Kernel::Point_3 p_parallel_plane(v_parallel_plane[0], v_parallel_plane[1], v_parallel_plane[2]);
 		Kernel::Plane_3 new_plane(p_parallel_plane, v_sum);
-		//std::cout << "V_sum: " << v_sum << " V_sum_unit: " << v_sum_unit << " V_offset: " << v_offset  << " offset:" << sqrt(CGAL::to_double(v_offset.squared_length())) << "=" << offset << std::endl;
-
 
 		return new_plane;
 	}
@@ -172,8 +169,6 @@ public:
 	static void getPolyhedraData(Linear_Complex_Combinatorial_Map& lc_combinatorial_map, std::vector<std::vector<Point_CM>>& polyhedra_points, std::vector<std::vector<std::vector<int>>>& polyhedra_faces);
 
 	static void getPolyhedraData_New(Linear_Complex_Combinatorial_Map& lc_combinatorial_map, std::vector<std::vector<Point_CM>>& polyhedra_points, std::vector<std::vector<std::vector<int>>>& polyhedra_faces, Eigen::VectorXd& limit_inf, Eigen::VectorXd& limit_sup);
-
-	static Polyhedron getPolyhedronFromCombinatorialMap(Linear_Complex_Combinatorial_Map lc_combinatorial_map, bool subdivide = true);
 
 	/*
 	*	It is required that the Combinatorial maps have their centre at the origin (0,0,0)

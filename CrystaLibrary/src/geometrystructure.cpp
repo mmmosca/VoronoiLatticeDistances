@@ -1,20 +1,19 @@
-/*
- * Permission is granted to copy, distribute and/or modify the documents
- * in this directory and its subdirectories unless otherwise stated under
- * the terms of the GNU Free Documentation License, Version 1.1 or any later version 
- * published by the Free Software Foundation; with no Invariant Sections, 
- * no Front-Cover Texts and no Back-Cover Texts. A copy of the license 
- * is available at the website of the GNU Project.
- * The programs and code snippets in this directory and its subdirectories
- * are free software; you can redistribute them and/or modify it under the 
- * terms of the GNU General Public License as published by the Free Software 
- * Foundation; either version 2 of the License, or (at your option) any later
- * version. This code is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * Author Marco M. Mosca, email: marcomichele.mosca@gmail.com
+/*Copyright (C) 2018-2022,2026 Marco M. Mosca
+
+This file is part of VoronoiLatticeDistances.
+
+VoronoiLatticeDistances is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+VoronoiLatticeDistances is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 */
 #include <geometrystructure.h>
 
@@ -48,9 +47,6 @@ Linear_Complex_Combinatorial_Map GeometryStructure::getDelaunayTriangulation() {
 	// Update the combinatorial map: Tetrahedra are added to the Linear Complex combinatorial map (No change in darts). Returns a dart handle to an infinite cell (3-simplex)
 	Dart_handle dh = CGAL::import_from_triangulation_3<Linear_Complex_Combinatorial_Map, Delaunay_Triangulation>(cm, DT, &cell_to_dart);
 
-	//std::cout << "Delaunay triangulation of " << dl_points.size() << " vertices with infinite vertex" << std::endl;
-	//cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << cm.is_without_boundary() << ", valid=" << cm.is_valid() << std::endl;;
-
 	return cm;
 }
 
@@ -75,11 +71,6 @@ Linear_Complex_Combinatorial_Map GeometryStructure::getFiniteDelaunayTriangulati
 	// Update the combinatorial map: Tetrahedra are added to the Linear Complex combinatorial map (No change in darts). Returns a dart handle to an infinite cell (3-simplex)
 	Dart_handle dh = CGAL::import_from_triangulation_3<Linear_Complex_Combinatorial_Map, Delaunay_Triangulation>(cm, DT, &cell_to_dart);
 
-	//std::cout << "Finite Delaunay triangulation of " << dl_points.size() << " vertices without infinite vertex" << std::endl;
-	//cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << cm.is_without_boundary() << ", valid=" << cm.is_valid() << std::endl;
-	//display_finite_characteristics(DT);
-	//display_finite_characteristics(cm, DT, cell_to_dart);
-	//updateToFiniteSimplicialComplex(cm, DT, cell_to_dart);
 	removeIncorrectGeometryFaces(cm);
 
 	return cm;
@@ -108,10 +99,6 @@ Linear_Complex_Combinatorial_Map GeometryStructure::getVoronoiDiagram(Dart_handl
 	// Update the combinatorial map: Tetrahedra are added to the Linear Complex combinatorial map (No change in darts). Returns a dart handle to an infinite cell (3-simplex)
 	Dart_handle dh = CGAL::import_from_triangulation_3<Linear_Complex_Combinatorial_Map, Delaunay_Triangulation>(cm, DT, &cell_to_dart);
 
-	//std::cout << "Delaunay triangulation of " << dl_points.size() << " vertices with " << DT.number_of_finite_cells() << " number of finite cell" << std::endl;
-	//cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << cm.is_without_boundary() << ", valid=" << cm.is_valid() << std::endl;;
-	//cm.display_darts(std::cout);
-
 	// Compute the Voronoi from Delaunay triangulation
 	Linear_Complex_Combinatorial_Map dual_cm;
 	// Compute the dual of the Combinatorial map cm
@@ -122,8 +109,6 @@ Linear_Complex_Combinatorial_Map GeometryStructure::getVoronoiDiagram(Dart_handl
 	set_geometry_of_dual(dual_cm, DT, cell_to_dart);
 
 	dh_inf = dh_dual;
-	//std::cout << "Voronoi Diagram of " << dl_points.size() << " vertices with infinite vertex" << std::endl;
-	//dual_cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << dual_cm.is_without_boundary() << ", valid=" << dual_cm.is_valid() << std::endl;;
 
 	return dual_cm;
 }
@@ -150,28 +135,14 @@ Linear_Complex_Combinatorial_Map GeometryStructure::getFiniteVoronoiDiagram() {
 	// Update the combinatorial map: Tetrahedra are added to the Linear Complex combinatorial map (No change in darts). Returns a dart handle to an infinite cell (3-simplex)
 	Dart_handle dh = CGAL::import_from_triangulation_3<Linear_Complex_Combinatorial_Map, Delaunay_Triangulation>(cm, DT, &cell_to_dart);
 
-	//std::cout << "Delaunay triangulation of " << dl_points.size() << " vertices with " << DT.number_of_finite_cells() << " number of finite cell" << std::endl;
-	//cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << cm.is_without_boundary() << ", valid=" << cm.is_valid() << std::endl;;
-
 	// Compute the Voronoi from Delaunay triangulation
 	Linear_Complex_Combinatorial_Map dual_cm;
 	// Compute the dual of the Combinatorial map cm and return a handle to the infinite cell
 	Dart_handle dh_dual = cm.dual(dual_cm, dh);
-	//std::cout << "After dual function...\n";
-	//display_finite_characteristics(dual_cm, DT, cell_to_dart);
-	//dual_cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << dual_cm.is_without_boundary() << ", valid=" << dual_cm.is_valid() << std::endl;;
 	//Update the darts and vertices of Voronoi cells
 	transform_dart_to_their_dual(cm, dual_cm, cell_to_dart);
 	set_geometry_of_dual(dual_cm, DT, cell_to_dart);
-	//std::cout << "After setting the geometry...\n";
-	//display_finite_characteristics(dual_cm, DT, cell_to_dart);
-	//dual_cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << dual_cm.is_without_boundary() << ", valid=" << dual_cm.is_valid() << std::endl;;
-	//std::cout << "\nDual geometry set...\n";
 	removeInfinteCellsFromDual(dual_cm, dh_dual);
-	//std::cout << "After Infinite cell removal...\n";
-	//display_finite_characteristics(dual_cm, DT, cell_to_dart);
-	//std::cout << "Finite Voronoi Diagram of " << dl_points.size() << " vertices without infinite vertex" << std::endl;
-	//dual_cm.display_characteristics(std::cout) << " #withoutBoundary=AllNonFree=" << dual_cm.is_without_boundary() << ", valid=" << dual_cm.is_valid() << std::endl;;
 
 	return dual_cm;
 }
@@ -185,10 +156,7 @@ void GeometryStructure::transformCombinatorialMap(Linear_Complex_Combinatorial_M
 		face_dart_end = lc_combinatorial_map.one_dart_per_cell<0>().end(); face_dart != face_dart_end; ++face_dart)
 	{
 		Point_CM p = lc_combinatorial_map.point(face_dart);
-		//std::cout << "Point: " << p << std::endl;
 		Kernel::Point_3 p3(p[0], p[1], p[2]);
-		//std::cout << "Transform..." << std::endl;
-		//std::cout << p3 << std::endl;
 		Kernel::Point_3 p_transf(p3.transform(transform_matrix));
 		Point_CM p_cm(CGAL::to_double(p_transf[0]), CGAL::to_double(p_transf[1]), CGAL::to_double(p_transf[2]));
 		lc_combinatorial_map.set_vertex_attribute(face_dart, lc_combinatorial_map.create_vertex_attribute(p_cm));
@@ -335,48 +303,12 @@ void GeometryStructure::getPointsAndFaces(Linear_Complex_Combinatorial_Map& lc_c
 		}
 	}
 
-	//Iterate all faces and remove incorrect faces and points
-	/*
-	std::cout << "No Filtered points...\n";
-	for (auto& p : points) {
-		std::cout << p << std::endl;
-	}
-	*/
 	final_faces = removeDuplicatedPointsInIndexedFaceList(points, faces);
-	/*
-	std::cout << "Filtered Faces, not modified\n";
-
-	int j = 1;
-	for (auto& f : final_faces) {
-		std::cout << "Face " << j << std::endl;
-		for (int i = 0; i < f.size(); ++i) {
-			std::cout << f[i] << " ";
-		}
-		std::cout << std::endl;
-		++j;
-	}
-	*/
 	for (int i = 0; i < final_faces.size(); ++i) {
 		for (int j = 0; j < final_faces[i].size(); ++j) {
 			final_faces[i][j] = doublepoint_to_point_map[final_faces[i][j]];
 		}
 	}
-	/*
-	std::cout << "Filtered and modified structs...\n";
-	for (auto& p : empty_points) {
-		std::cout << p << std::endl;
-	}
-
-	j = 1;
-	for (auto& f : final_faces) {
-		std::cout << "Face " << j << std::endl;
-		for (int i = 0; i < f.size(); ++i) {
-			std::cout << f[i] << " ";
-		}
-		std::cout << std::endl;
-		++j;
-	}
-	*/
 	empty_faces.assign(final_faces.begin(), final_faces.end());
 }
 
@@ -606,26 +538,6 @@ void GeometryStructure::getPolyhedraData_New(Linear_Complex_Combinatorial_Map& l
 		polyhedra_points.push_back(final_points);
 	}
 
-}
-
-Polyhedron GeometryStructure::getPolyhedronFromCombinatorialMap(Linear_Complex_Combinatorial_Map lc_combinatorial_map, bool subdivide) {
-	Polyhedron P;
-	//Triangulation T;
-	//Triangulation_basic T;
-	//Build_Polyhedron_From_Triangulation<Polyhedron::HalfedgeDS> poly(T);
-	Build_Polyhedron_From_Combinatorial_Map<Polyhedron::HalfedgeDS> poly(lc_combinatorial_map);
-	P.delegate(poly);
-	P.normalize_border();
-	if (subdivide) {
-		if (P.size_of_border_edges() != 0) {
-			std::cerr << "The input object has border edges. Cannot subdivide."
-				<< std::endl;
-			std::exit(1);
-		}
-		subdiv(P);
-	}
-
-	return P;
 }
 
 void GeometryStructure::writePointsToCSVFormatFile(const char* filename) {

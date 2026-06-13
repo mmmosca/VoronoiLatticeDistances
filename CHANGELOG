@@ -1,5 +1,9 @@
 # Project changes
 
+## [0.8.0]
+    - Add verbose option to scripts
+    - Update copyright statements
+    - Improve logging
 ## [0.7.0]
     - Add dependencies file for smart cache in CI
     - Add PeriodicPointCloud tests for 2D space
