@@ -1,5 +1,6 @@
 # Project changes
 
+    - Add verbose option to scripts
     - Update copyright statements
     - Improve logging
 ## [0.7.0]

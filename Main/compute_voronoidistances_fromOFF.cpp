@@ -32,8 +32,9 @@ std::string usage{"|--- USAGE ---|:\nVoronoi Computation is performed on a 3x3x3
 					"-dh:\tOutputs .csv file with Extended Hausdorff Distance matrix (n x n) between all n crystal lattices\n"\
 					"Optional commands:\n\t"\
 					"-intervals [integer n (default n=2)]:\tIt affects the number of rotation samples to be considered for metric computations (number of rotations: 4*pi^2*n^3)\n\t"\
-					"-threads [integer t (default t=1)]:\tRotation samples are divided among t threads \n"\
-					"-debug\tEnable debug message logging\n"};
+					"-threads [integer t (default t=1)]:\tRotation samples are divided among t threads \n\t"\
+					"-debug\tEnable debug message logging\n\t"\
+					"-verbose\tEnable more verbose message logging"};
 
 int main(int argc, char* argv[]) {
 	std::string input_dir, output_dir;
@@ -49,7 +50,7 @@ int main(int argc, char* argv[]) {
 	bool DEBUG_OPT = false;
 
 	char* w;
-	while ((w = cmd.mygetoptW(argc, argv, "inputdir:|outputdir:|dh|ds|intervals:|threads:|debug|help|")) != NULL) {
+	while ((w = cmd.mygetoptW(argc, argv, "inputdir:|outputdir:|dh|ds|intervals:|threads:|debug|verbose|help|")) != NULL) {
 		if (strcmp(w, "inputdir") == 0) {
 			input_dir.assign(cmd.myoptarg);
 			INPUTDIR_OPT = true;
@@ -79,11 +80,15 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(w, "debug") == 0) {
-			DEBUG_OPT = true;
+			Logger::setLevel(LogLevel::LOGDEBUG);
+			continue;
+		}
+		if (strcmp(w, "verbose") == 0) {
+			Logger::setLevel(LogLevel::LOGINFO);
 			continue;
 		}
 		if (strcmp(w, "help") == 0) {
-			Logger::info("USAGE\n" + usage);
+			Logger::error("USAGE\n" + usage);
 			exit(EXIT_SUCCESS);
 		}
 	}
@@ -96,12 +101,6 @@ int main(int argc, char* argv[]) {
 	if (!OUTPUT_OPT) {
 		Logger::error("No option for results detected. Please choose an option!\n" + usage);
 		exit(EXIT_FAILURE);
-	}
-
-	if (DEBUG_OPT) {
-		Logger::setLevel(LogLevel::LOGDEBUG);
-	} else {
-		Logger::setLevel(LogLevel::LOGINFO);
 	}
 
 	Logger::info("Loading data from OFF files...");

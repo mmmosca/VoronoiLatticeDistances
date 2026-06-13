@@ -48,7 +48,7 @@ File `.vtp` can be visualized with [Paraview software](https://www.paraview.org/
   .\voronoilatticedistances_off.exe -inputdir "path\to\off_folder" -outputdir "path\to\output_dir" -ds -dh 
 ```
 
-Required options: 
+Required options for `voronoilatticedistances.exe`: 
 
 - `-inputdir`		[Input Folder with CIF files] 
 - `-outputdir`	[Output Folder to write metric results] 
@@ -66,6 +66,8 @@ Optional commands:
 
 - `-intervals`	[integer n (default n=2)]	It affects the number of rotation samples to be considered for metric computations (total number of rotations: 4*pi^2*n^3) 
 - `-threads`		[integer t (default t=1)]	Rotation samples are divided among t threads
+- `-debug`      Enable debug message logging
+- `-verbose`    Enable more verbose message logging
 
 ## Example of Voronoi Domains
 There are following the Voronoi domains of 5 real crystal lattices from the `T2 dataset` used in our experiments: T2-epsilon, T2-delta, T2-beta, T2-gamma and T2-alpha. Plus, the voronoi domains of the standard cubic, body-centred cubic and face-centred cubic lattices.
