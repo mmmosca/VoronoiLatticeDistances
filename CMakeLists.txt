@@ -18,7 +18,7 @@ along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 *]]
 cmake_minimum_required (VERSION 3.8)
 
-project (VoronoiLatticeDistances VERSION 0.7.0 LANGUAGES CXX)
+project (VoronoiLatticeDistances VERSION 0.8.0 LANGUAGES CXX)
 
 message(STATUS "Project directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
