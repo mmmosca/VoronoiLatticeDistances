@@ -1,5 +1,6 @@
 # Project changes
 
+    - Improve documentation with pictures, heatmap and dendogram
 ## [0.8.0]
     - Add verbose option to scripts
     - Update copyright statements
