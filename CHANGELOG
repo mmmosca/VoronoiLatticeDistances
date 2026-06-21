@@ -1,5 +1,6 @@
 # Project changes
 
+    - Remove unnecessary counters in PeriodicPointCloud class
     - Remove build directory before the project installation
     - Add test about Voronoi Diagram generation from a lattice
     - Improve documentation with pictures, heatmap and dendogram

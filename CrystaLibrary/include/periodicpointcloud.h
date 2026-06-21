@@ -45,8 +45,8 @@ public:
 	// Set of coefficients permutations
 	std::vector<Eigen::VectorXd> C_combinations;
 
-	// Vectors dimension, number of generators, number of linear combinations, number of coefficients permutaions, number of coefficients
-	int dimension, generator_count = 0, g_combination_count = 0, c_combination_count = 0, coef_count = 0;
+	// Vectors dimension
+	int dimension;
 
 	// Param d: generators dimension
 	PeriodicPointCloud(const int& d) : dimension{ d } {};
