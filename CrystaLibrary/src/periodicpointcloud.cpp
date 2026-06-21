@@ -30,7 +30,6 @@ void PeriodicPointCloud::updateCoefficientsForEveryDirection(int n) {
 	this->clearCoefficients();
 	for (int i = -n; i <= n; ++i) {
 		this->C.push_back(i);
-		++this->coef_count;
 	}
 }
 
@@ -39,7 +38,6 @@ void PeriodicPointCloud::updateCoefficientsForPositiveDirection(int n) {
 	this->clearCoefficients();
 	for (int i = 0; i <= n; ++i) {
 		this->C.push_back(i);
-		++this->coef_count;
 	}
 }
 
@@ -48,7 +46,6 @@ void PeriodicPointCloud::updateCoefficientsFromRange(int i, int j) {
 	this->clearCoefficients();
 	for (int n = i; n <= j; ++n) {
 		this->C.push_back(n);
-		++this->coef_count;
 	}
 }
 
@@ -62,34 +59,31 @@ bool checkElementsInVector(Eigen::VectorXd main_vector, std::vector<int> to_chec
 }
 
 void PeriodicPointCloud::updateCoefficientCombinations(std::vector<int> to_filter, Eigen::VectorXd v, int n) {
-	if (n == this->generator_count) {
+	if (n == this->G.size()) {
 		return;
 	}
 	else {
 		if (n == -1) {
 			//Inizialize the starting vector and call the recursion with n = 0
-			Eigen::VectorXd first_combination(this->generator_count);
-			for (int i = 0; i < this->generator_count; ++i) {
+			Eigen::VectorXd first_combination(this->G.size());
+			for (int i = 0; i < this->G.size(); ++i) {
 				first_combination(i) = this->C[0];
 			}
 			this->C_combinations.push_back(first_combination);
-			++this->c_combination_count;
 			updateCoefficientCombinations(to_filter, first_combination, n + 1);
 
 		}
 		else {
 			updateCoefficientCombinations(to_filter, v, n + 1);
 			Eigen::VectorXd next_combination(v);
-			for (int c = 1; c < this->coef_count; ++c) {
+			for (int c = 1; c < this->C.size(); ++c) {
 				next_combination[n] = this->C[c];
 				if (to_filter.empty()) {					
 					this->C_combinations.push_back(next_combination);
-					++this->c_combination_count;
 				}
 				else {
 					if (checkElementsInVector(next_combination, to_filter)) {
 						this->C_combinations.push_back(next_combination);
-						++this->c_combination_count;
 					}
 				}
 				updateCoefficientCombinations(to_filter, next_combination, n + 1);
@@ -103,14 +97,14 @@ void PeriodicPointCloud::updateGeneratorCombinations() {
 	Eigen::VectorXd c;
 
 	// If linear combinations should be added start from new ones
-	if (this->g_combination_count > 0) {
-		j = this->g_combination_count;
+	if (this->G_combinations.size() > 0) {
+		j = this->G_combinations.size();
 	}
 	else {
 		// If linear combinations should be created from beginning (from first coefficient permutation)
 		j = 0;
 	}
-	for (; j < this->c_combination_count; ++j) {
+	for (; j < this->C_combinations.size(); ++j) {
 		c = this->C_combinations[j];
 		Eigen::VectorXd new_combination = Eigen::VectorXd::Zero(this->dimension);
 		i = 0;
@@ -119,7 +113,6 @@ void PeriodicPointCloud::updateGeneratorCombinations() {
 			++i;
 		}
 		this->G_combinations.push_back(new_combination);
-		++this->g_combination_count;
 	}
 }
 
@@ -128,15 +121,15 @@ void PeriodicPointCloud::updateGeneratorCombinationsForPoints(std::vector<Eigen:
 	Eigen::VectorXd c;
 
 	// If linear combinations should be added start from new ones
-	if (this->g_combination_count > 0) {
-		j = this->g_combination_count;
+	if (this->G_combinations.size() > 0) {
+		j = this->G_combinations.size();
 	}
 	else {
 		// If linear combinations should be created from beginning (from first coefficient permutation)
 		j = 0;
 	}
 
-	for (; j < this->c_combination_count; ++j) {
+	for (; j < this->C_combinations.size(); ++j) {
 		c = this->C_combinations[j];
 		Eigen::VectorXd new_combination = Eigen::VectorXd::Zero(this->dimension);
 		i = 0;
@@ -147,14 +140,13 @@ void PeriodicPointCloud::updateGeneratorCombinationsForPoints(std::vector<Eigen:
 		for (auto &p : points) {
 			Eigen::VectorXd new_motif(new_combination + p);
 			this->G_combinations.push_back(new_motif);
-			++this->g_combination_count;
 		}
 	}
 }
 
 void PeriodicPointCloud::extendBasisVectorsCoefficientsAndLinearCombinations(int n, std::vector<Eigen::VectorXd> points) {
 	// Assumption: this->C is ordered
-	int left_border = this->C[0], right_border = this->C[this->coef_count - 1];
+	int left_border = this->C[0], right_border = this->C[this->C.size() - 1];
 	std::vector<int> new_coefficients;
 
 	for (int i = left_border - n; i < left_border; ++i) {
@@ -182,7 +174,6 @@ void PeriodicPointCloud::extendBasisVectorsCoefficientsAndLinearCombinations(int
 void PeriodicPointCloud::addGenerator(Eigen::VectorXd g) {
 	assert(g.size() == this->dimension);
 	this->G.insert(g);
-	++this->generator_count;
 }
 
 void PeriodicPointCloud::clear() {
@@ -190,25 +181,13 @@ void PeriodicPointCloud::clear() {
 	this->G.clear();
 	this->C_combinations.clear();
 	this->G_combinations.clear();
-	this->generator_count = 0;
-	this->coef_count = 0;
-	this->c_combination_count = 0;
-	this->g_combination_count = 0;
 }
 
 void PeriodicPointCloud::clearCoefficients() {
 	this->C.clear();
-	this->coef_count = 0;
 }
 
 void PeriodicPointCloud::clearCombinations() {
-	//this->C.clear();
-	//this->G.clear();
 	this->C_combinations.clear();
 	this->G_combinations.clear();
-	//this->generator_count = 0;
-	//this->coef_count = 0;
-	this->c_combination_count = 0;
-	this->g_combination_count = 0;
-
 }
