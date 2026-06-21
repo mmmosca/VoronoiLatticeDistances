@@ -1,5 +1,6 @@
 # Project changes
 
+    - Read stdout and stderr asynchronously during the installation
     - Remove unnecessary counters in PeriodicPointCloud class
     - Remove build directory before the project installation
     - Add test about Voronoi Diagram generation from a lattice
