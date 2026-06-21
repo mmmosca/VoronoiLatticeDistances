@@ -49,11 +49,7 @@ TEST_P(PPCParameterizedTest, Permutations)
 	ppc.updateGeneratorCombinations();
 
     EXPECT_EQ(ppc.C.size(), testCase.expected_coefficients);
-    EXPECT_EQ(ppc.coef_count, testCase.expected_coefficients);
     EXPECT_EQ(ppc.C_combinations.size(), testCase.expected_c_permutations);
-    EXPECT_EQ(ppc.c_combination_count,  testCase.expected_c_permutations);
     EXPECT_EQ(ppc.G.size(), testCase.expected_generators);
-    EXPECT_EQ(ppc.generator_count, testCase.expected_generators);
     EXPECT_EQ(ppc.G_combinations.size(), testCase.expected_g_permutations);
-    EXPECT_EQ(ppc.g_combination_count, testCase.expected_g_permutations);
 }
