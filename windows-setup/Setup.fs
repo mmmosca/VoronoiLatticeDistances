@@ -40,12 +40,15 @@ let start_process (proc: string) (args: string array) =
     startInfo.CreateNoWindow <- true
     let proc = new Process(StartInfo = startInfo)
     proc.Start() |> ignore
-    let stdout = proc.StandardOutput.ReadToEnd()
-    let stderr = proc.StandardError.ReadToEnd()
+    let stdoutAsync = proc.StandardOutput.ReadToEndAsync()
+    let stderrAsync = proc.StandardError.ReadToEndAsync()
     proc.WaitForExit()
+    let stdout = stdoutAsync.Result
+    let stderr = stderrAsync.Result
+
+    printfn "%s" stdout
     if proc.ExitCode <> 0 then
         failwithf "Process failed (%d): %s" proc.ExitCode stderr
-    printfn "%s" stdout
 
 let configure (src_dir:string) (variables: string array) = 
     let build_dir = Path.Combine(src_dir, "build")
