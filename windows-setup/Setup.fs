@@ -209,7 +209,10 @@ let installDependencies ext_dir build_type =
 let main args =
     let subcommand = args[0]
     let ext_dir = Path.GetFullPath(@"..\External")
+    let build_dir = @"..\build"
 
+    if Directory.Exists build_dir then
+        Directory.Delete(build_dir, true)
     match subcommand with
     | "installdeps" ->
         let build_type = args[1]

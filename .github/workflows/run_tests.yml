@@ -36,7 +36,10 @@ jobs:
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/windows-setup
-      run: dotnet run installdeps ${{env.BUILD_TYPE}}
+      run: |
+        dotnet run installdeps ${{env.BUILD_TYPE}}
+        $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+        $userPath.Split(';') | Where-Object { $_ } | Add-Content $env:GITHUB_PATH
 
     - name: Install project VoronoiLatticeDistances
       working-directory: ${{github.workspace}}/windows-setup

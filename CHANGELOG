@@ -1,5 +1,7 @@
 # Project changes
 
+    - Remove build directory before the project installation
+    - Add test about Voronoi Diagram generation from a lattice
     - Improve documentation with pictures, heatmap and dendogram
 ## [0.8.0]
     - Add verbose option to scripts
