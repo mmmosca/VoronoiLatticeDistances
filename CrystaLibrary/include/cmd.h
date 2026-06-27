@@ -28,7 +28,7 @@ along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <string.h>
-#include <Windows.h>
+#include <cstdlib>
 
 int isCharInString(char c, char* str);
 
