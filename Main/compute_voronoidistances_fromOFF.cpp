@@ -18,7 +18,7 @@ along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 #include <voronoicell.h>
 #include <cmd.h>
 #include <fileio.h>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <chrono>
 #include <ctime>
 #include "logging.h"
@@ -108,14 +108,14 @@ int main(int argc, char* argv[]) {
 
 	VoronoiCellMetrics voronoi_metrics;
 	int file_count = 0;
-	for (boost::filesystem::directory_iterator itr(input_dir); itr != boost::filesystem::directory_iterator(); ++itr)
+	for (const auto& itr : std::filesystem::directory_iterator(input_dir))
 	{
-		std::string filename(itr->path().string());
+		std::string filename(itr.path().string());
 		filename.erase(0, filename.find_last_of("\\/") + 1);
 		filename.erase(filename.find_last_of('.'), filename.length());
-		if (strcmp(itr->path().extension().string().c_str(), ".off") == 0) {
+		if (itr.path().extension().string() == ".off") {
 			Logger::info(std::to_string(++file_count) + " - Loading OFF file: " + filename);
-			OFFFile off_reader(itr->path().string());
+			OFFFile off_reader(itr.path().string());
 			VoronoiCell v;
 			v.setPoints(off_reader.getPoints());
 			v.setFaces(off_reader.getFaces());

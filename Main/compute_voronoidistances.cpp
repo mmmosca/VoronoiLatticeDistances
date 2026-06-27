@@ -20,7 +20,7 @@ along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 #include <fstream>
 #include <string>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <voronoidiagram.h>
 #include <cmd.h>
 #include <cifio.h>
@@ -47,7 +47,6 @@ std::string usage{"|--- USAGE ---|:\nVoronoi Computation is performed on a 3x3x3
 				"-threads [integer t (default t=1)]:\tRotation samples are divided among t threads \n\t"\
 				"-debug\tEnable debug message logging\n\t"\
 				"-verbose\tEnable more verbose message logging"};
-
 
 int main(int argc, char* argv[]) {
 	std::string input_dir, output_dir;
@@ -147,14 +146,14 @@ int main(int argc, char* argv[]) {
 	std::ofstream out_volume;
 
 	if (VTP_OPT) {
-		boost::filesystem::create_directory(boost::filesystem::path(output_dir_vtp));
+		std::filesystem::create_directory(std::filesystem::path(output_dir_vtp));
 	}
 	if (CSV_OPT) {
-		boost::filesystem::create_directory(boost::filesystem::path(output_dir_csv));
-		boost::filesystem::create_directory(boost::filesystem::path(output_dir_latticecsv));
+		std::filesystem::create_directory(std::filesystem::path(output_dir_csv));
+		std::filesystem::create_directory(std::filesystem::path(output_dir_latticecsv));
 	}
 	if (OFF_OPT) {
-		boost::filesystem::create_directory(boost::filesystem::path(output_dir_off));
+		std::filesystem::create_directory(std::filesystem::path(output_dir_off));
 	}
 	if (VOLUME_OPT) {
 		out_volume.open(volume_file_name);
