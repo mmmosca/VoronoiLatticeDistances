@@ -32,6 +32,27 @@ IF(WIN32)
 	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 ENDIF()
 
+include(FetchContent)
+
+if(DEFINED BUILD_TESTING)
+    set(_BUILD_TESTING_SAVE "${BUILD_TESTING}")
+    set(_BUILD_TESTING_WAS_DEFINED TRUE)
+endif()
+
+FetchContent_Declare(
+    periodic_point_cloud
+    URL https://github.com/mmmosca/periodic-point-cloud/archive/refs/tags/0.1.0.tar.gz
+)
+
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(periodic_point_cloud)
+
+if(_BUILD_TESTING_WAS_DEFINED)
+    set(BUILD_TESTING "${_BUILD_TESTING_SAVE}" CACHE BOOL "" FORCE)
+else()
+    unset(BUILD_TESTING CACHE)
+endif()
+
 include(${CGAL_USE_FILE})
 include(${VTK_USE_FILE})
 
@@ -45,7 +66,13 @@ else()
 ENDIF()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR} )
-target_link_libraries(${PROJECT_NAME} ${BOOST_LIBRARIES} ${CGAL_LIBRARIES} ${VTK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+	PUBLIC
+		${BOOST_LIBRARIES}
+		${CGAL_LIBRARIES}
+		${VTK_LIBRARIES}
+		periodic_point_cloud
+)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
 	LIBRARY_OUTPUT_DIRECTORY "${WORKDIR}"

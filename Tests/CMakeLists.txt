@@ -12,7 +12,6 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
     tests
-    test_periodicpointcloud.cpp
     test_crystalstructure.cpp
     test_voronoidiagram.cpp
 )
