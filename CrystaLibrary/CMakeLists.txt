@@ -41,7 +41,7 @@ endif()
 
 FetchContent_Declare(
     periodic_point_cloud
-    URL https://github.com/mmmosca/periodic-point-cloud/archive/refs/tags/0.1.0.tar.gz
+    URL https://github.com/mmmosca/periodic-point-cloud/archive/refs/tags/0.1.1.tar.gz
 )
 
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
