@@ -20,7 +20,7 @@ along with VoronoiLatticeDistances. If not, see <https://www.gnu.org/licenses/>.
 
 #include <Eigen/Dense>
 #include <vector>
-#include <periodicpointcloud.h>
+#include <periodic_point_cloud/periodicpointcloud.h>
 #include <linearcomplex.h>
 #include <kernel.h>
 
