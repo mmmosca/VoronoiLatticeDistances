@@ -1,5 +1,6 @@
 # Project changes
 
+    - Bump `periodic_point_cloud` to 0.1.1
     - Fetch the `periodic_point_cloud` repository in Cmake file
     - Use built-in filesystem library
 ## [0.9.0]
